@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Overworld</title>
+</head>
+<body>
+  <h2>Choose a world</h2>
+
+  <button onclick="go('math')">Math</button>
+  <button onclick="go('literacy')">Literacy</button>
+  <button onclick="go('science')">Science</button>
+
+  <script src="js/firebase.js"></script>
+  <script>
+    function go(w){
+      window.location.href = `world-${w}.html`;
+    }
+  </script>
+</body>
+</html>

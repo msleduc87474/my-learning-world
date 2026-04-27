@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Math World</title>
+</head>
+<body>
+  <h2>Math World</h2>
+
+  <button onclick="complete()">Complete Lesson</button>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/engine.js"></script>
+
+  <script>
+    function complete(){
+      saveProgress();
+      alert("Saved!");
+    }
+  </script>
+</body>
+</html>
