@@ -1,10 +1,40 @@
 <!DOCTYPE html>
 <html>
-<body style="background: lightgreen; text-align:center; padding-top:100px;">
+<head>
+  <title>Game Map</title>
+</head>
 
-<h1>MAP TEST</h1>
+<body style="margin:0; background: lightgreen; overflow:hidden;">
 
-<div style="width:100px; height:100px; background:red; margin:auto;"></div>
+<h2 style="text-align:center;">🌍 Map</h2>
+
+<!-- Map area -->
+<div style="position:relative; width:100vw; height:80vh;">
+
+  <!-- Path (simple line for now) -->
+  <div style="position:absolute; left:150px; top:400px; width:500px; height:10px; background:white;"></div>
+
+  <!-- Nodes -->
+  <div onclick="move()" style="position:absolute; left:150px; top:370px; width:60px; height:60px; background:gold; border-radius:50%; text-align:center; line-height:60px; font-weight:bold; cursor:pointer;">1</div>
+
+  <div onclick="go()" style="position:absolute; left:650px; top:370px; width:60px; height:60px; background:gold; border-radius:50%; text-align:center; line-height:60px; font-weight:bold; cursor:pointer;">2</div>
+
+  <!-- Avatar -->
+  <div id="avatar" style="position:absolute; left:150px; top:370px; width:40px; height:40px; background:red; border-radius:50%;"></div>
+
+</div>
+
+<script>
+  const avatar = document.getElementById("avatar");
+
+  function move(){
+    avatar.style.left = "650px";
+  }
+
+  function go(){
+    window.location.href = "world-math.html";
+  }
+</script>
 
 </body>
 </html>
