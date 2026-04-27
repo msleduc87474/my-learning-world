@@ -2,19 +2,37 @@
 <html>
 <head>
   <title>Overworld</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #222;
+      color: white;
+      padding-top: 100px;
+    }
+
+    button {
+      padding: 20px;
+      margin: 10px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>Choose a world</h2>
 
-  <button onclick="go('math')">Math</button>
-  <button onclick="go('literacy')">Literacy</button>
-  <button onclick="go('science')">Science</button>
+  <h2>🌍 Choose Your World</h2>
 
-  <script src="js/firebase.js"></script>
+  <button onclick="go('math')">➕ Math</button>
+  <button onclick="go('literacy')">📖 Literacy</button>
+  <button onclick="go('science')">🔬 Science</button>
+
   <script>
     function go(w){
       window.location.href = `world-${w}.html`;
     }
   </script>
+
 </body>
 </html>
