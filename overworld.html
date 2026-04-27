@@ -48,7 +48,7 @@
       position: absolute;
       width: 64px;
       height: 64px;
-      background-image: url("https://raw.githubusercontent.com/jlongster/canvas-game-bootstrap/master/assets/images/sprites/player.png");
+      background-image: url("https://opengameart.org/sites/default/files/Green-Cap-Character-16x18.png");
       background-size: 256px 64px;
       z-index: 10;
     }
@@ -76,18 +76,15 @@
 <script>
   const avatar = document.getElementById("avatar");
 
-  // start position
   avatar.style.left = "150px";
   avatar.style.top = "400px";
 
-  // animation system
   let frame = 0;
   let walking = false;
   let walkInterval;
 
   function startWalking(){
     if(walking) return;
-
     walking = true;
 
     walkInterval = setInterval(()=>{
@@ -119,13 +116,8 @@
       avatar.style.left = (point.x - 32) + "px";
       avatar.style.top = (point.y - 32) + "px";
 
-      // direction
       let dx = nextPoint.x - point.x;
-      if(dx < 0){
-        avatar.style.transform = "scaleX(-1)";
-      } else {
-        avatar.style.transform = "scaleX(1)";
-      }
+      avatar.style.transform = dx < 0 ? "scaleX(-1)" : "scaleX(1)";
 
       if(progress < length){
         requestAnimationFrame(animate);
