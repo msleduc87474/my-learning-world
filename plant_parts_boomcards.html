@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Parts of a Plant — Science · Living Things · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a3325;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .chrome {
+    width: 100%; max-width: 580px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; padding: 0 4px;
+  }
+  .deck-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); }
+  .card-ctr   { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .score-chip { background: #f0a500; border-radius: 99px; padding: 4px 13px; font-size: 12px; font-weight: 700; color: #fff; }
+  .prog-track { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: #4cd47a; border-radius: 3px; transition: width .5s ease; }
+
+  .card { width: 100%; max-width: 580px; background: #fff; border-radius: 20px; overflow: hidden; min-height: 440px; display: flex; flex-direction: column; }
+  .stripe { height: 8px; background: #1D9E75; transition: background .3s; }
+  .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 22px 14px; text-align: center; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-top: 1.5px solid #f0f0f0; }
+  .fn-back { padding: 10px 22px; border-radius: 99px; border: 2px solid #ddd; background: transparent; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
+  .fn-back:disabled { opacity: .3; cursor: default; }
+  .fn-back:not(:disabled):hover { background: #f5f5f5; }
+  .fn-next { padding: 10px 28px; border-radius: 99px; border: none; background: #1D9E75; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .fn-next:disabled { background: #a0d4bb; cursor: default; }
+  .fn-next:not(:disabled):hover { background: #0F6E56; }
+
+  .type-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; }
+  .b-learn  { background: #E1F5EE; color: #085041; }
+  .b-label  { background: #E6F1FB; color: #0C447C; }
+  .b-mc     { background: #EAF3DE; color: #27500A; }
+  .b-tf     { background: #FAEEDA; color: #633806; }
+  .b-match  { background: #EEEDFE; color: #3C3489; }
+  .b-finish { background: #E1F5EE; color: #085041; }
+
+  .audio-btn { display: flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 99px; border: 2px solid #d0e8dc; background: #f4fcf8; font-size: 13px; font-weight: 600; color: #1D9E75; cursor: pointer; margin-bottom: 16px; }
+  .audio-btn:hover { background: #d0e8dc; }
+  .spk { width: 18px; height: 18px; }
+
+  /* Plant SVG illustration */
+  .plant-wrap { margin: 8px 0 16px; }
+
+  .card-instruction { font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.3; }
+  .card-hint        { font-size: 13px; color: #888; margin-bottom: 18px; }
+
+  /* Highlight a part */
+  .part-highlight { display: inline-block; padding: 6px 18px; border-radius: 99px; font-size: 17px; font-weight: 800; margin-bottom: 16px; }
+  .ph-roots  { background: #FAEEDA; color: #633806; border: 2px solid #EF9F27; }
+  .ph-stem   { background: #EAF3DE; color: #27500A; border: 2px solid #97C459; }
+  .ph-leaves { background: #E1F5EE; color: #085041; border: 2px solid #1D9E75; }
+  .ph-flower { background: #FBEAF0; color: #72243E; border: 2px solid #D4537E; }
+
+  .part-desc { font-size: 14px; color: #555; max-width: 300px; line-height: 1.6; margin-bottom: 6px; }
+
+  /* Multiple choice */
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    min-width: 120px; padding: 12px 16px; border-radius: 14px;
+    border: 3px solid #dde4f0; background: #fff;
+    font-size: 15px; font-weight: 700; color: #1a1a2e;
+    cursor: pointer; transition: transform .1s, border-color .18s, background .18s;
+    line-height: 1.3;
+  }
+  .choice:not(:disabled):hover  { transform: scale(1.05); border-color: #1D9E75; }
+  .choice:not(:disabled):active { transform: scale(0.95); }
+  .choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* True/False */
+  .tf-row { display: flex; gap: 16px; justify-content: center; }
+  .tf-btn { width: 120px; height: 64px; border-radius: 16px; border: 3px solid #dde4f0; background: #fff; font-size: 20px; font-weight: 800; cursor: pointer; transition: transform .12s, border-color .18s, background .18s; }
+  .tf-btn:not(:disabled):hover  { transform: scale(1.07); }
+  .tf-btn:not(:disabled):active { transform: scale(0.94); }
+  .tf-btn.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .tf-btn.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Match pairs */
+  .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+  .match-item { padding: 11px 14px; border-radius: 12px; border: 2.5px solid #dde4f0; background: #f8faff; font-size: 14px; font-weight: 700; cursor: pointer; transition: border-color .15s, background .15s; text-align: center; line-height: 1.3; min-height: 52px; display: flex; align-items: center; justify-content: center; }
+  .match-item:hover { border-color: #1D9E75; background: #eef8f3; }
+  .match-item.selected { border-color: #1D9E75; background: #d0f0e0; }
+  .match-item.matched  { border-color: #1D9E75; background: #E1F5EE; color: #085041; cursor: default; }
+  .match-item.wrong    { border-color: #E24B4A; background: #FFEEEE; animation: shake .3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  .feedback { font-size: 15px; font-weight: 700; margin-top: 14px; min-height: 22px; }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Finish */
+  .finish { display: flex; flex-direction: column; align-items: center; padding: 28px 20px; }
+  .score-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .sc { background: #f4fcf8; border-radius: 14px; padding: 14px 18px; text-align: center; border: 2px solid #d0e8dc; min-width: 82px; }
+  .sc-n { font-size: 28px; font-weight: 800; color: #1D9E75; }
+  .sc-l { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+  .badges { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bdg { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bdg-ring { width: 54px; height: 54px; border-radius: 50%; border: 3px solid #1D9E75; background: #E1F5EE; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .bdg-lbl { font-size: 10px; color: #888; text-align: center; line-height: 1.3; max-width: 60px; }
+  .replay-btn { padding: 12px 32px; border-radius: 99px; border: 2.5px solid #1D9E75; background: transparent; color: #1D9E75; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .replay-btn:hover { background: #f0fcf7; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="deck-title">Parts of a Plant</span>
+  <span class="card-ctr" id="ctr">Card 1 of 13</span>
+  <span class="score-chip" id="chip">0 / 0</span>
+</div>
+<div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="card" id="card">
+  <div class="stripe" id="stripe"></div>
+  <div class="card-body" id="body"></div>
+  <div class="card-footer">
+    <button class="fn-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span style="font-size:12px;color:#bbb" id="nav-hint"></span>
+    <button class="fn-next" id="btn-next" onclick="goNext()">Start deck</button>
+  </div>
+</div>
+
+<script>
+var cur=0, correct=0, ans={};
+
+// Match state
+var matchSel=null, matchDone=[], matchWrong=null;
+
+var PARTS = {
+  roots:  { label:'Roots',  color:'#854F0B', bg:'#FAEEDA', border:'#EF9F27', desc:'Roots grow underground. They drink water from the soil and hold the plant in place.', emoji:'🌾' },
+  stem:   { label:'Stem',   color:'#3B6D11', bg:'#EAF3DE', border:'#97C459', desc:'The stem holds the plant up tall. It carries water from the roots to the leaves.', emoji:'🌿' },
+  leaves: { label:'Leaves', color:'#085041', bg:'#E1F5EE', border:'#1D9E75', desc:'Leaves catch sunlight and make food for the plant. This is called photosynthesis.', emoji:'🍃' },
+  flower: { label:'Flower', color:'#72243E', bg:'#FBEAF0', border:'#D4537E', desc:'Flowers make seeds so new plants can grow. They often attract bees and butterflies.', emoji:'🌸' }
+};
+
+function plantSVG(highlight) {
+  var parts = {
+    roots:  highlight==='roots',
+    stem:   highlight==='stem',
+    leaves: highlight==='leaves',
+    flower: highlight==='flower'
+  };
+  var rCol   = parts.roots  ? '#BA7517' : '#d4a96a';
+  var sCol   = parts.stem   ? '#3B6D11' : '#7ab648';
+  var lCol   = parts.leaves ? '#1D9E75' : '#a8d85a';
+  var fCol   = parts.flower ? '#D4537E' : '#f4b8cc';
+  var fCen   = parts.flower ? '#BA7517' : '#fce18a';
+  var sw = highlight ? '3' : '1.5';
+  return '<svg viewBox="0 0 200 260" width="160" height="208" xmlns="http://www.w3.org/2000/svg">'
+    // Soil line
+    +'<rect x="10" y="185" width="180" height="6" rx="3" fill="#c9a96a" opacity=".5"/>'
+    // Roots
+    +'<g opacity="'+(parts.roots?'1':'.7')+'">'
+    +'<path d="M100 185 Q90 205 75 220" stroke="'+rCol+'" stroke-width="'+(parts.roots?4:3)+'" fill="none" stroke-linecap="round"/>'
+    +'<path d="M100 185 Q100 210 100 225" stroke="'+rCol+'" stroke-width="'+(parts.roots?4:3)+'" fill="none" stroke-linecap="round"/>'
+    +'<path d="M100 185 Q112 205 125 218" stroke="'+rCol+'" stroke-width="'+(parts.roots?4:3)+'" fill="none" stroke-linecap="round"/>'
+    +'<path d="M90 200 Q80 215 70 225" stroke="'+rCol+'" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>'
+    +'<path d="M110 200 Q120 215 130 224" stroke="'+rCol+'" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>'
+    +'</g>'
+    // Stem
+    +'<path d="M100 185 L100 105" stroke="'+sCol+'" stroke-width="'+(parts.stem?7:5)+'" stroke-linecap="round" opacity="'+(parts.stem?'1':'.85')+'"/>'
+    // Leaves
+    +'<g opacity="'+(parts.leaves?'1':'.8')+'">'
+    +'<ellipse cx="72" cy="148" rx="28" ry="14" fill="'+lCol+'" transform="rotate(-30 72 148)"/>'
+    +'<ellipse cx="128" cy="132" rx="28" ry="14" fill="'+lCol+'" transform="rotate(30 128 132)"/>'
+    +'<path d="M72 148 Q86 140 100 140" stroke="'+sCol+'" stroke-width="1.5" fill="none" opacity=".5"/>'
+    +'<path d="M128 132 Q114 128 100 128" stroke="'+sCol+'" stroke-width="1.5" fill="none" opacity=".5"/>'
+    +'</g>'
+    // Flower
+    +'<g opacity="'+(parts.flower?'1':'.85')+'">'
+    +'<ellipse cx="100" cy="72" rx="14" ry="20" fill="'+fCol+'" transform="rotate(0  100 72)"/>'
+    +'<ellipse cx="100" cy="72" rx="14" ry="20" fill="'+fCol+'" transform="rotate(45 100 72)"/>'
+    +'<ellipse cx="100" cy="72" rx="14" ry="20" fill="'+fCol+'" transform="rotate(90 100 72)"/>'
+    +'<ellipse cx="100" cy="72" rx="14" ry="20" fill="'+fCol+'" transform="rotate(135 100 72)"/>'
+    +'<circle cx="100" cy="72" r="16" fill="'+fCen+'"/>'
+    +'</g>'
+    // Highlight ring
+    +(highlight?'<circle cx="100" cy="'+(highlight==='roots'?'210':highlight==='stem'?'145':highlight==='leaves'?'140':'72')+'" r="'+(highlight==='flower'?'30':highlight==='leaves'?'36':highlight==='stem'?'14':'22')+'" fill="none" stroke="'+PARTS[highlight].border+'" stroke-width="3" stroke-dasharray="6 4" opacity=".8"/>':'')
+    +'</svg>';
+}
+
+var CARDS = [
+  {type:'intro'},
+  {type:'learn', part:'roots'},
+  {type:'learn', part:'stem'},
+  {type:'learn', part:'leaves'},
+  {type:'learn', part:'flower'},
+  {type:'mc', q:'What part drinks water from the soil?', correct:'Roots', choices:['Roots','Flower','Leaves','Stem'], highlight:'roots'},
+  {type:'mc', q:'What holds the plant up tall?', correct:'Stem', choices:['Roots','Stem','Flower','Leaves'], highlight:'stem'},
+  {type:'tf', q:'Leaves catch sunlight to make food.', answer:true, highlight:'leaves'},
+  {type:'tf', q:'The stem grows underground.', answer:false, highlight:'stem'},
+  {type:'mc', q:'What part makes seeds for new plants?', correct:'Flower', choices:['Stem','Roots','Flower','Leaves'], highlight:'flower'},
+  {type:'label', q:'Tap the correct name for the highlighted part.', highlight:'leaves', correct:'Leaves', choices:['Roots','Stem','Leaves','Flower']},
+  {type:'match', q:'Match each part to what it does.', pairs:[
+    {part:'Roots',  job:'Drink water from soil'},
+    {part:'Stem',   job:'Holds the plant up'},
+    {part:'Leaves', job:'Catch sunlight'},
+    {part:'Flower', job:'Makes new seeds'}
+  ]},
+  {type:'finish'}
+];
+
+var quizTypes = ['mc','tf','label','match'];
+var qCards = CARDS.filter(function(c){return quizTypes.indexOf(c.type)>=0;});
+
+function stripeColor(type) {
+  if(type==='learn')  return '#1D9E75';
+  if(type==='mc')     return '#3B6D11';
+  if(type==='label')  return '#185FA5';
+  if(type==='tf')     return '#854F0B';
+  if(type==='match')  return '#533AB7';
+  if(type==='finish') return '#1D9E75';
+  return '#1D9E75';
+}
+
+function say(text) {
+  if('speechSynthesis' in window){ var u=new SpeechSynthesisUtterance(text); u.rate=0.85; u.pitch=1.05; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+}
+
+function audioBtn(text) {
+  return '<button class="audio-btn" onclick="say(\''+text.replace(/'/g,"\\'")+'\')"><svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Hear question</button>';
+}
+
+function updateChrome() {
+  document.getElementById('ctr').textContent  = 'Card '+(cur+1)+' of '+CARDS.length;
+  var pct = cur===0?0:cur>=CARDS.length-1?100:Math.round((cur/(CARDS.length-2))*100);
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('chip').textContent = correct+' / '+qCards.length;
+  document.getElementById('stripe').style.background = stripeColor(CARDS[cur].type);
+  document.getElementById('btn-back').disabled = cur===0;
+  var nxt = document.getElementById('btn-next');
+  var c = CARDS[cur];
+  var quizAnswered = quizTypes.indexOf(c.type)>=0 && ans[cur]===undefined;
+  nxt.disabled = quizAnswered;
+  nxt.textContent = cur===0?'Start deck':cur>=CARDS.length-2?'See results':'Next card';
+}
+
+function render() {
+  updateChrome();
+  var c = CARDS[cur];
+  var b = document.getElementById('body');
+
+  if(c.type==='intro') {
+    b.innerHTML = '<div style="font-size:60px;margin-bottom:10px">🌱</div>'
+      +'<div class="type-badge b-learn">Science · Living Things · Level 1</div>'
+      +'<div class="card-instruction">Parts of a Plant</div>'
+      +'<div class="card-hint" style="max-width:290px;line-height:1.6">Learn the four parts of a plant and what each one does. Tap your answers on every card.</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#E1F5EE;color:#085041;font-weight:600">13 cards</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EAF3DE;color:#27500A;font-weight:600">4 card types</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EEEDFE;color:#3C3489;font-weight:600">Audio support</span>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn') {
+    var p = PARTS[c.part];
+    b.innerHTML = '<div class="type-badge b-learn">Learn</div>'
+      +'<button class="audio-btn" onclick="say(\''+p.label+'. '+p.desc+'\')"><svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Hear about '+p.label+'</button>'
+      +'<div class="plant-wrap">'+plantSVG(c.part)+'</div>'
+      +'<div class="part-highlight ph-'+c.part+'">'+p.emoji+' '+p.label+'</div>'
+      +'<div class="part-desc">'+p.desc+'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='mc') {
+    var prev = ans[cur];
+    var btns = c.choices.map(function(ch){
+      var cl = prev!==undefined ? (ch===c.correct?'correct':(ch===prev?'wrong':'')) : '';
+      return '<button class="choice '+cl+'" onclick="pickMC(\''+ch+'\',\''+c.correct+'\')" '+(prev!==undefined?'disabled':'')+'>'+ch+'</button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===c.correct ? '<div class="feedback good">Correct! Great job!</div>' : '<div class="feedback bad">The answer is '+c.correct+'.</div>') : '';
+    b.innerHTML = '<div class="type-badge b-mc">Choose the answer</div>'
+      +audioBtn(c.q)
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="plant-wrap">'+plantSVG(c.highlight)+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='tf') {
+    var prev = ans[cur];
+    var trCl = prev!==undefined ? (c.answer===true  ? (prev===true?'correct':'') : (prev===true?'wrong':'')) : '';
+    var faCl = prev!==undefined ? (c.answer===false ? (prev===false?'correct':'') : (prev===false?'wrong':'')) : '';
+    var fb = prev!==undefined ? (prev===c.answer ? '<div class="feedback good">Correct!</div>' : '<div class="feedback bad">'+(c.answer?'True':'False')+' — '+PARTS[c.highlight].desc+'</div>') : '';
+    b.innerHTML = '<div class="type-badge b-tf">True or False</div>'
+      +audioBtn(c.q)
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="plant-wrap">'+plantSVG(c.highlight)+'</div>'
+      +'<div class="tf-row">'
+      +'<button class="tf-btn '+trCl+'" onclick="pickTF(true,'+c.answer+')" '+(prev!==undefined?'disabled':'')+'>True</button>'
+      +'<button class="tf-btn '+faCl+'" onclick="pickTF(false,'+c.answer+')" '+(prev!==undefined?'disabled':'')+'>False</button>'
+      +'</div>'+fb;
+
+  } else if(c.type==='label') {
+    var prev = ans[cur];
+    var p = PARTS[c.highlight];
+    var btns = c.choices.map(function(ch){
+      var cl = prev!==undefined ? (ch===c.correct?'correct':(ch===prev?'wrong':'')) : '';
+      return '<button class="choice '+cl+'" onclick="pickMC(\''+ch+'\',\''+c.correct+'\')" '+(prev!==undefined?'disabled':'')+'>'+ch+'</button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===c.correct ? '<div class="feedback good">Correct! That is the '+c.correct+'.</div>' : '<div class="feedback bad">The highlighted part is the '+c.correct+'.</div>') : '';
+    b.innerHTML = '<div class="type-badge b-label">Name the part</div>'
+      +audioBtn(c.q)
+      +'<div class="card-instruction">What part is highlighted?</div>'
+      +'<div class="plant-wrap">'+plantSVG(c.highlight)+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='match') {
+    var prev = ans[cur];
+    if(prev) {
+      var rows = c.pairs.map(function(p){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:2px solid #1D9E75;background:#E1F5EE;margin-bottom:8px">'
+          +'<span style="font-weight:700;color:#085041;min-width:70px;font-size:14px">'+p.part+'</span>'
+          +'<span style="font-size:18px">→</span>'
+          +'<span style="font-size:13px;color:#0F6E56">'+p.job+'</span>'
+          +'</div>';
+      }).join('');
+      b.innerHTML='<div class="type-badge b-match">Match complete</div>'
+        +'<div class="card-instruction" style="margin-bottom:12px">Well done!</div>'
+        +'<div style="width:100%;max-width:360px">'+rows+'</div>';
+    } else {
+      renderMatch(c);
+      return;
+    }
+
+  } else if(c.type==='finish') {
+    var total=qCards.length;
+    var pct=Math.round((correct/total)*100);
+    var msg=pct===100?'Perfect score!':pct>=60?'Great scientist!':'Keep exploring!';
+    b.innerHTML='<div class="finish">'
+      +'<div style="font-size:64px;margin-bottom:8px">🌿</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Deck complete!</div>'
+      +'<div style="font-size:15px;color:#666;margin-bottom:16px">'+msg+'</div>'
+      +'<div class="score-row">'
+      +'<div class="sc"><div class="sc-n">'+correct+'</div><div class="sc-l">Correct</div></div>'
+      +'<div class="sc"><div class="sc-n">'+total+'</div><div class="sc-l">Questions</div></div>'
+      +'<div class="sc"><div class="sc-n">'+pct+'%</div><div class="sc-l">Score</div></div>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<div class="bdg"><div class="bdg-ring">🌱</div><div class="bdg-lbl">Plant Parts</div></div>'
+      +'<div class="bdg"><div class="bdg-ring">🔬</div><div class="bdg-lbl">Young Scientist</div></div>'
+      +(pct===100?'<div class="bdg"><div class="bdg-ring">🏆</div><div class="bdg-lbl">Perfect deck!</div></div>':'')
+      +'</div>'
+      +'<button class="replay-btn" onclick="restart()">Play again</button>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=true;
+    document.getElementById('btn-next').textContent='Done';
+  }
+}
+
+function renderMatch(c) {
+  var b=document.getElementById('body');
+  var parts  = c.pairs.map(function(p){return p.part;});
+  var jobs   = c.pairs.map(function(p){return p.job;}).sort(function(){return Math.random()-.5;});
+  var pMap   = {}; c.pairs.forEach(function(p){pMap[p.part]=p.job;});
+
+  var leftHTML  = parts.map(function(p){
+    var mc = matchDone.indexOf(p)>=0 ? 'matched' : (matchWrong&&matchWrong.part===p?'wrong':'');
+    return '<div class="match-item '+mc+'" id="ml-'+p.replace(' ','_')+'" onclick="matchLeft(\''+p+'\')">'+(matchDone.indexOf(p)>=0?p+' ✓':p)+'</div>';
+  }).join('');
+  var rightHTML = jobs.map(function(j){
+    var matched = matchDone.some(function(p){return pMap[p]===j;});
+    var mc = matched?'matched':(matchWrong&&matchWrong.job===j?'wrong':'');
+    return '<div class="match-item '+mc+'" id="mr-'+j.replace(/ /g,'_')+'" onclick="matchRight(\''+j+'\')">'+(matched?j+' ✓':j)+'</div>';
+  }).join('');
+
+  b.innerHTML='<div class="type-badge b-match">Match pairs</div>'
+    +audioBtn(c.q)
+    +'<div class="card-instruction" style="margin-bottom:10px">'+c.q+'</div>'
+    +'<div class="match-grid">'+leftHTML+rightHTML+'</div>'
+    +(matchDone.length===c.pairs.length?'<div class="feedback good">All matched!</div>':'<div style="font-size:12px;color:#aaa;margin-top:8px">Tap a part, then tap what it does.</div>');
+}
+
+var _matchPart=null;
+function matchLeft(part) {
+  if(ans[cur]!==undefined||matchDone.indexOf(part)>=0) return;
+  _matchPart=part;
+  matchWrong=null;
+  renderMatch(CARDS[cur]);
+  var el=document.getElementById('ml-'+part.replace(' ','_'));
+  if(el) el.classList.add('selected');
+}
+function matchRight(job) {
+  if(!_matchPart||ans[cur]!==undefined) return;
+  var c=CARDS[cur], pMap={};
+  c.pairs.forEach(function(p){pMap[p.part]=p.job;});
+  if(pMap[_matchPart]===job) {
+    matchDone.push(_matchPart);
+    matchWrong=null;
+    if(matchDone.length===c.pairs.length){
+      ans[cur]='done'; correct++;
+      updateChrome();
+    }
+  } else {
+    matchWrong={part:_matchPart,job:job};
+  }
+  _matchPart=null;
+  renderMatch(c);
+}
+
+function pickMC(chosen, correctAns) {
+  if(ans[cur]!==undefined) return;
+  ans[cur]=chosen;
+  if(chosen===correctAns) correct++;
+  updateChrome(); render();
+}
+function pickTF(chosen, correctAns) {
+  if(ans[cur]!==undefined) return;
+  ans[cur]=chosen;
+  if(chosen===correctAns) correct++;
+  updateChrome(); render();
+}
+function goNext() { if(cur<CARDS.length-1){cur++;render();} }
+function goBack() { if(cur>0){cur--;render();} }
+function restart() { cur=0;correct=0;ans={};matchDone=[];matchWrong=null;_matchPart=null;render(); }
+render();
+</script>
+</body>
+</html>

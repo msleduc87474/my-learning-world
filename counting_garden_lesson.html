@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>The Counting Garden — Math · Number Sense · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .app {
+    background: #ffffff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 480px;
+    min-height: 580px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    overflow: hidden;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: #185FA5;
+    color: #fff;
+  }
+  .lesson-name { font-size: 13px; font-weight: 600; opacity: 0.9; }
+  .xp-chip {
+    background: rgba(255,255,255,0.2);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Progress bar */
+  .prog-wrap { background: #e8f0fb; height: 8px; }
+  .prog-fill { height: 100%; background: #1D9E75; border-radius: 0 4px 4px 0; transition: width 0.4s ease; }
+
+  /* Slide area */
+  .slide {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 24px 16px;
+    text-align: center;
+  }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-top: 1px solid #f0f0f0;
+    gap: 10px;
+  }
+  .nav-back {
+    padding: 12px 24px;
+    border-radius: 99px;
+    border: 2px solid #e0e0e0;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    min-width: 80px;
+  }
+  .nav-back:disabled { opacity: 0.3; cursor: default; }
+  .nav-next {
+    padding: 12px 28px;
+    border-radius: 99px;
+    border: none;
+    background: #185FA5;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 100px;
+  }
+  .nav-next:disabled { background: #b0c8e8; cursor: default; }
+  .slide-count { font-size: 12px; color: #aaa; }
+
+  /* Intro slide */
+  .intro-icon { font-size: 72px; margin-bottom: 14px; }
+  .intro-title { font-size: 26px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+  .intro-body { font-size: 16px; color: #555; line-height: 1.6; max-width: 300px; }
+  .intro-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    background: #E1F5EE;
+    color: #085041;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Learn slide */
+  .big-number { font-size: 88px; font-weight: 800; color: #185FA5; line-height: 1; margin-bottom: 4px; }
+  .number-word { font-size: 22px; color: #888; margin-bottom: 20px; text-transform: capitalize; }
+  .object-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .obj-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: #f5f7ff;
+    border: 2px solid #e0e8ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    animation: popIn 0.25s ease forwards;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .obj-box:nth-child(2) { animation-delay: .07s; }
+  .obj-box:nth-child(3) { animation-delay: .14s; }
+  .obj-box:nth-child(4) { animation-delay: .21s; }
+  .obj-box:nth-child(5) { animation-delay: .28s; }
+  .count-hint { font-size: 14px; color: #aaa; }
+
+  /* Quiz slide */
+  .q-text { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+  .q-hint { font-size: 14px; color: #888; margin-bottom: 18px; }
+  .answer-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .ans-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    border: 3px solid #ddd;
+    background: #fff;
+    font-size: 30px;
+    font-weight: 800;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: transform .1s, border-color .2s, background .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ans-btn:not(:disabled):hover { transform: scale(1.08); border-color: #185FA5; }
+  .ans-btn:not(:disabled):active { transform: scale(0.95); }
+  .ans-btn.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .ans-btn.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #791F1F; }
+  .feedback {
+    margin-top: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    min-height: 26px;
+  }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Reward slide */
+  .reward-icon { font-size: 72px; margin-bottom: 10px; }
+  .reward-title { font-size: 26px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+  .reward-sub { font-size: 15px; color: #666; margin-bottom: 16px; }
+  .xp-earned {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-radius: 99px;
+    background: #FAEEDA;
+    color: #633806;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .badges-row { display: flex; gap: 16px; justify-content: center; }
+  .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .badge-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 3px solid #1D9E75;
+    background: #E1F5EE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+  .badge-name { font-size: 11px; color: #888; text-align: center; line-height: 1.3; }
+  .replay-btn {
+    margin-top: 20px;
+    padding: 12px 28px;
+    border-radius: 99px;
+    border: 2px solid #185FA5;
+    background: transparent;
+    color: #185FA5;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .replay-btn:hover { background: #f0f5ff; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <span class="lesson-name">The Counting Garden</span>
+    <span class="xp-chip" id="xp-display">0 XP</span>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+  <div class="slide" id="slide"></div>
+  <div class="nav">
+    <button class="nav-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span class="slide-count" id="slide-count"></span>
+    <button class="nav-next" id="btn-next" onclick="goNext()">Start</button>
+  </div>
+</div>
+
+<script>
+var xp = 0, cur = 0, ans = {};
+
+var slides = [
+  { type: 'intro' },
+  { type: 'learn', num: 1, emoji: '🍎', word: 'one',   count: 1 },
+  { type: 'learn', num: 2, emoji: '🌻', word: 'two',   count: 2 },
+  { type: 'learn', num: 3, emoji: '🐸', word: 'three', count: 3 },
+  { type: 'quiz',  q: 'How many apples?',  emoji: '🍎', correct: 2, choices: [1, 2, 3] },
+  { type: 'quiz',  q: 'How many flowers?', emoji: '🌻', correct: 3, choices: [2, 3, 4] },
+  { type: 'learn', num: 4, emoji: '🐱', word: 'four',  count: 4 },
+  { type: 'learn', num: 5, emoji: '⭐', word: 'five',  count: 5 },
+  { type: 'quiz',  q: 'How many cats?',    emoji: '🐱', correct: 4, choices: [3, 4, 5] },
+  { type: 'quiz',  q: 'How many stars?',   emoji: '⭐', correct: 5, choices: [4, 5, 6] },
+  { type: 'reward' }
+];
+
+function render() {
+  var s = slides[cur];
+  var total = slides.length - 2;
+  var progress = cur === 0 ? 0 : cur >= slides.length - 1 ? 100 : Math.round((cur / total) * 100);
+  document.getElementById('prog').style.width = progress + '%';
+  document.getElementById('xp-display').textContent = xp + ' XP';
+  document.getElementById('btn-back').disabled = cur === 0;
+  var nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = cur === 0 ? 'Start' : cur >= slides.length - 2 ? 'Finish!' : 'Next';
+  nextBtn.disabled = s.type === 'quiz' && ans[cur] === undefined;
+  var sc = document.getElementById('slide-count');
+  sc.textContent = (cur > 0 && cur < slides.length - 1) ? cur + ' of ' + total : '';
+
+  var el = document.getElementById('slide');
+
+  if (s.type === 'intro') {
+    el.innerHTML = '<div class="intro-icon">🌱</div><div class="intro-title">The Counting Garden</div><div class="intro-body">Let\'s learn to count from 1 to 5!<br>Watch, count, and tap the right answer.</div><div class="intro-badge">Math · Number Sense · Level 1</div>';
+
+  } else if (s.type === 'learn') {
+    var boxes = '';
+    for (var i = 0; i < s.count; i++) {
+      boxes += '<div class="obj-box" style="animation-delay:' + (i * 0.08) + 's">' + s.emoji + '</div>';
+    }
+    el.innerHTML = '<div class="big-number">' + s.num + '</div><div class="number-word">' + s.word + '</div><div class="object-row">' + boxes + '</div><div class="count-hint">Count the objects: ' + s.count + ' in total</div>';
+
+  } else if (s.type === 'quiz') {
+    var objs = '';
+    for (var i = 0; i < s.correct; i++) {
+      objs += '<div class="obj-box" style="animation-delay:' + (i * 0.08) + 's">' + s.emoji + '</div>';
+    }
+    var chosen = ans[cur];
+    var btns = s.choices.map(function(c) {
+      var cls = '';
+      if (chosen !== undefined) { cls = c === s.correct ? 'correct' : c === chosen ? 'wrong' : ''; }
+      return '<button class="ans-btn ' + cls + '" onclick="pick(' + c + ',' + s.correct + ')" ' + (chosen !== undefined ? 'disabled' : '') + '>' + c + '</button>';
+    }).join('');
+    var fb = '';
+    if (chosen !== undefined) {
+      fb = chosen === s.correct
+        ? '<div class="feedback good">Well done! That is correct!</div>'
+        : '<div class="feedback bad">Not quite — the answer is ' + s.correct + '.</div>';
+    }
+    el.innerHTML = '<div class="q-text">' + s.q + '</div><div class="q-hint">Count carefully, then tap the number.</div><div class="object-row" style="margin-bottom:18px">' + objs + '</div><div class="answer-row">' + btns + '</div>' + fb;
+
+  } else if (s.type === 'reward') {
+    el.innerHTML = '<div class="reward-icon">🏅</div><div class="reward-title">You did it!</div><div class="reward-sub">Amazing counting in the garden today.</div><div class="xp-earned">+' + xp + ' XP earned</div><div class="badges-row"><div class="badge-item"><div class="badge-circle">🌱</div><div class="badge-name">Counting<br>1–5</div></div><div class="badge-item"><div class="badge-circle">🌟</div><div class="badge-name">Garden<br>Explorer</div></div></div><button class="replay-btn" onclick="restart()">Play again</button>';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Done';
+  }
+}
+
+function pick(chosen, correct) {
+  ans[cur] = chosen;
+  if (chosen === correct) xp += 10;
+  document.getElementById('btn-next').disabled = false;
+  render();
+}
+
+function goNext() { if (cur < slides.length - 1) { cur++; render(); } }
+function goBack() { if (cur > 0) { cur--; render(); } }
+function restart() { xp = 0; cur = 0; ans = {}; render(); }
+
+render();
+</script>
+</body>
+</html>

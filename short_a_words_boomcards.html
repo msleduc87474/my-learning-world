@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Short A Words — Literacy · Phonics · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #2a1a3a;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .chrome { width: 100%; max-width: 580px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+  .deck-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); }
+  .card-ctr   { font-size: 13px; color: rgba(255,255,255,.5); }
+  .score-chip { background: #f0a500; border-radius: 99px; padding: 4px 13px; font-size: 12px; font-weight: 700; color: #fff; }
+  .prog-track { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,.15); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: #a78bf0; border-radius: 3px; transition: width .5s ease; }
+
+  .card { width: 100%; max-width: 580px; background: #fff; border-radius: 20px; overflow: hidden; min-height: 450px; display: flex; flex-direction: column; }
+  .stripe { height: 8px; background: #7F77DD; transition: background .3s; }
+  .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 22px 14px; text-align: center; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-top: 1.5px solid #f0f0f0; }
+  .fn-back { padding: 10px 22px; border-radius: 99px; border: 2px solid #ddd; background: transparent; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
+  .fn-back:disabled { opacity: .3; cursor: default; }
+  .fn-back:not(:disabled):hover { background: #f5f5f5; }
+  .fn-next { padding: 10px 28px; border-radius: 99px; border: none; background: #534AB7; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .fn-next:disabled { background: #c0baee; cursor: default; }
+  .fn-next:not(:disabled):hover { background: #3C3489; }
+
+  .type-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  .b-learn  { background: #EEEDFE; color: #3C3489; }
+  .b-sound  { background: #E6F1FB; color: #0C447C; }
+  .b-blend  { background: #EAF3DE; color: #27500A; }
+  .b-mc     { background: #FAEEDA; color: #633806; }
+  .b-spell  { background: #FBEAF0; color: #72243E; }
+  .b-finish { background: #EEEDFE; color: #3C3489; }
+
+  .audio-btn { display: flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 99px; border: 2px solid #d0cbf6; background: #f4f2ff; font-size: 13px; font-weight: 600; color: #534AB7; cursor: pointer; margin-bottom: 14px; }
+  .audio-btn:hover { background: #d0cbf6; }
+  .spk { width: 18px; height: 18px; }
+
+  /* CVC word display */
+  .cvc-display { display: flex; gap: 6px; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .cvc-box {
+    width: 64px; height: 72px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px; font-weight: 900;
+    border: 3px solid;
+    animation: popIn .2s ease both;
+  }
+  @keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+  .cvc-box.cons { background: #EEEDFE; border-color: #7F77DD; color: #3C3489; }
+  .cvc-box.vowel{ background: #FAEEDA; border-color: #EF9F27; color: #633806; }
+  .cvc-box:nth-child(2){ animation-delay:.07s }
+  .cvc-box:nth-child(3){ animation-delay:.14s }
+  .cvc-dash { font-size: 22px; color: #ccc; margin: 0 2px; }
+
+  .word-big { font-size: 52px; font-weight: 900; color: #3C3489; letter-spacing: 4px; margin-bottom: 8px; }
+  .word-img  { font-size: 72px; margin-bottom: 10px; }
+  .word-sentence { font-size: 15px; color: #666; line-height: 1.5; max-width: 300px; margin-bottom: 6px; }
+
+  /* Sound tap buttons */
+  .sound-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .sound-btn {
+    padding: 12px 20px; border-radius: 14px; border: 3px solid #d0cbf6;
+    background: #f4f2ff; font-size: 22px; font-weight: 800; color: #3C3489;
+    cursor: pointer; min-width: 60px;
+    transition: transform .1s, border-color .15s, background .15s;
+  }
+  .sound-btn:hover { transform: scale(1.1); border-color: #7F77DD; background: #e6e3ff; }
+  .sound-btn:active { transform: scale(.93); }
+  .sound-btn.tapped { border-color: #534AB7; background: #EEEDFE; animation: wiggle .3s ease; }
+  @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} }
+
+  /* Blend animation */
+  .blend-arrow { font-size: 28px; color: #AFA9EC; margin: 0 4px; }
+  .blend-result { font-size: 44px; font-weight: 900; color: #534AB7; margin-top: 10px; letter-spacing: 6px; }
+  .blend-hint   { font-size: 13px; color: #888; margin-top: 4px; }
+
+  /* Multiple choice */
+  .card-instruction { font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; line-height: 1.3; }
+  .card-hint        { font-size: 13px; color: #888; margin-bottom: 16px; }
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    min-width: 100px; padding: 12px 16px; border-radius: 14px;
+    border: 3px solid #dde4f0; background: #fff;
+    font-size: 18px; font-weight: 800; color: #1a1a2e;
+    cursor: pointer; transition: transform .1s, border-color .18s, background .18s;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .choice .choice-img { font-size: 26px; }
+  .choice:not(:disabled):hover  { transform: scale(1.06); border-color: #7F77DD; }
+  .choice:not(:disabled):active { transform: scale(.94); }
+  .choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Spell / build-a-word */
+  .spell-slots { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .spell-slot {
+    width: 58px; height: 66px; border-radius: 12px; border: 3px dashed #d0cbf6;
+    background: #f8f6ff; display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 900; color: #3C3489;
+    transition: border-color .15s, background .15s;
+  }
+  .spell-slot.filled  { border-style: solid; border-color: #7F77DD; background: #EEEDFE; }
+  .spell-slot.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .spell-slot.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+  .letter-bank { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+  .letter-tile {
+    width: 52px; height: 52px; border-radius: 12px; border: 2.5px solid #d0cbf6;
+    background: #fff; font-size: 26px; font-weight: 900; color: #3C3489;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .1s, background .15s;
+  }
+  .letter-tile:not(.used):hover  { transform: scale(1.12); background: #EEEDFE; border-color: #7F77DD; }
+  .letter-tile:not(.used):active { transform: scale(.92); }
+  .letter-tile.used   { opacity: .25; cursor: default; }
+  .spell-check-btn {
+    padding: 10px 28px; border-radius: 99px; border: none;
+    background: #534AB7; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .spell-check-btn:disabled { background: #c0baee; cursor: default; }
+  .spell-check-btn:not(:disabled):hover { background: #3C3489; }
+
+  .feedback { font-size: 15px; font-weight: 700; margin-top: 12px; min-height: 22px; }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Finish */
+  .score-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .sc    { background: #f4f2ff; border-radius: 14px; padding: 14px 18px; text-align: center; border: 2px solid #d0cbf6; min-width: 82px; }
+  .sc-n  { font-size: 28px; font-weight: 800; color: #534AB7; }
+  .sc-l  { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+  .badges { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bdg   { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bdg-ring { width: 54px; height: 54px; border-radius: 50%; border: 3px solid #7F77DD; background: #EEEDFE; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .bdg-lbl  { font-size: 10px; color: #888; text-align: center; line-height: 1.3; max-width: 60px; }
+  .replay-btn { padding: 12px 32px; border-radius: 99px; border: 2.5px solid #534AB7; background: transparent; color: #534AB7; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .replay-btn:hover { background: #f4f2ff; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="deck-title">Short A Words</span>
+  <span class="card-ctr" id="ctr">Card 1 of 15</span>
+  <span class="score-chip" id="chip">0 / 0</span>
+</div>
+<div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="card">
+  <div class="stripe" id="stripe"></div>
+  <div class="card-body" id="body"></div>
+  <div class="card-footer">
+    <button class="fn-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span style="font-size:12px;color:#bbb" id="nav-hint"></span>
+    <button class="fn-next" id="btn-next" onclick="goNext()">Start deck</button>
+  </div>
+</div>
+
+<script>
+var cur=0, correct=0, ans={};
+var spellSlots=[], spellUsed=[];
+
+var WORDS = [
+  { word:'cat', letters:['c','a','t'], emoji:'🐱', sentence:'The cat sat on the mat.', img_alt:'a cat' },
+  { word:'hat', letters:['h','a','t'], emoji:'🎩', sentence:'I wear a hat on my head.', img_alt:'a hat' },
+  { word:'bat', letters:['b','a','t'], emoji:'🏏', sentence:'Hit the ball with a bat.', img_alt:'a bat' },
+  { word:'map', letters:['m','a','p'], emoji:'🗺️', sentence:'Look at the map to find the way.', img_alt:'a map' },
+  { word:'tap', letters:['t','a','p'], emoji:'🚿', sentence:'Turn on the tap for water.', img_alt:'a tap' }
+];
+
+var CARDS = [
+  { type:'intro' },
+  // Learn: cat
+  { type:'learn', wi:0 },
+  { type:'sound', wi:0 },
+  // Learn: hat
+  { type:'learn', wi:1 },
+  // Learn: bat
+  { type:'learn', wi:2 },
+  // MC: picture -> word
+  { type:'mc_pic', q:'Which picture shows "cat"?', correct:0, choices:[0,1,2], field:'emoji' },
+  // Blend card
+  { type:'blend', wi:3 },
+  { type:'learn', wi:3 },
+  { type:'learn', wi:4 },
+  // MC: word -> picture
+  { type:'mc_word', q:'Find the picture for "hat"', correct:1, choices:[0,1,2], field:'emoji' },
+  // Spell: build cat
+  { type:'spell', wi:0, bank:['c','t','b','a'] },
+  // MC: first sound
+  { type:'mc_sound', q:'What sound does "bat" start with?', correct:'b', choices:['b','c','h','m'], wi:2 },
+  // Spell: build map
+  { type:'spell', wi:3, bank:['m','t','a','p'] },
+  // MC: rhyme
+  { type:'mc_rhyme', q:'Which word rhymes with "cat"?', correct:'bat', choices:['map','bat','tap','hat'].sort(function(){return Math.random()-.5;}), word:'cat' },
+  { type:'finish' }
+];
+
+var quizTypes = ['mc_pic','mc_word','mc_sound','mc_rhyme','spell'];
+var qCards = CARDS.filter(function(c){return quizTypes.indexOf(c.type)>=0;});
+
+function stripeColor(t){
+  if(t==='learn'||t==='blend'||t==='sound') return '#7F77DD';
+  if(t==='mc_pic'||t==='mc_word')  return '#534AB7';
+  if(t==='mc_sound')  return '#185FA5';
+  if(t==='mc_rhyme')  return '#854F0B';
+  if(t==='spell')     return '#993556';
+  if(t==='finish')    return '#7F77DD';
+  return '#7F77DD';
+}
+
+function say(text){ if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(text);u.rate=0.8;u.pitch=1.1;speechSynthesis.cancel();speechSynthesis.speak(u);} }
+
+function audioBtn(text,label){
+  label=label||'Hear it';
+  return '<button class="audio-btn" onclick="say(\''+text.replace(/'/g,"\\'")+'\')">'
+    +'<svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'+label+'</button>';
+}
+
+function cvcBoxes(letters, highlight){
+  // c=consonant, v=vowel (position 1)
+  return letters.map(function(l,i){
+    var type = i===1?'vowel':'cons';
+    var hl = highlight===i?' style="transform:scale(1.18);box-shadow:0 0 0 3px #534AB7"':'';
+    return '<div class="cvc-box '+type+'"'+hl+'>'+l.toUpperCase()+'</div>';
+  }).join('');
+}
+
+function updateChrome(){
+  document.getElementById('ctr').textContent='Card '+(cur+1)+' of '+CARDS.length;
+  var pct=cur===0?0:cur>=CARDS.length-1?100:Math.round((cur/(CARDS.length-2))*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('chip').textContent=correct+' / '+qCards.length;
+  document.getElementById('stripe').style.background=stripeColor(CARDS[cur].type);
+  document.getElementById('btn-back').disabled=cur===0;
+  var nxt=document.getElementById('btn-next');
+  var c=CARDS[cur];
+  var quizNeedsAns=quizTypes.indexOf(c.type)>=0&&ans[cur]===undefined;
+  nxt.disabled=quizNeedsAns;
+  nxt.textContent=cur===0?'Start deck':cur>=CARDS.length-2?'See results':'Next card';
+}
+
+function render(){
+  updateChrome();
+  var c=CARDS[cur];
+  var b=document.getElementById('body');
+
+  if(c.type==='intro'){
+    b.innerHTML='<div style="font-size:60px;margin-bottom:10px">📖</div>'
+      +'<div class="type-badge b-learn">Literacy · Phonics · Level 1</div>'
+      +'<div class="card-instruction">Short A Words</div>'
+      +'<div class="card-hint" style="max-width:290px;line-height:1.6">Learn to read and spell CVC words with the short A sound.<br>Listen, tap, and build words!</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EEEDFE;color:#3C3489;font-weight:600">15 cards</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#FAEEDA;color:#633806;font-weight:600">5 words</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#E6F1FB;color:#0C447C;font-weight:600">Build-a-word</span>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn'){
+    var w=WORDS[c.wi];
+    b.innerHTML='<div class="type-badge b-learn">Learn</div>'
+      +audioBtn(w.word+'. '+w.sentence,'Hear word')
+      +'<div class="word-img">'+w.emoji+'</div>'
+      +'<div class="cvc-display">'+cvcBoxes(w.letters,-1)+'</div>'
+      +'<div class="word-big">'+w.word+'</div>'
+      +'<div class="word-sentence">'+w.sentence+'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='sound'){
+    var w=WORDS[c.wi];
+    b.innerHTML='<div class="type-badge b-sound">Tap each sound</div>'
+      +'<div class="card-instruction" style="margin-bottom:6px">Tap each letter to hear its sound.</div>'
+      +'<div class="card-hint">Then tap the word to hear it all together.</div>'
+      +'<div class="sound-row">'
+      +w.letters.map(function(l,i){
+        return '<button class="sound-btn" id="sb-'+i+'" onclick="tapSound(\''+l+'\','+i+')">'
+          +l.toUpperCase()+'</button>';
+      }).join('<span class="blend-arrow">+</span>')
+      +'</div>'
+      +'<div style="font-size:26px;color:#ccc;margin:4px 0">↓</div>'
+      +audioBtn(w.word,'Tap to blend: '+w.word)
+      +'<div class="cvc-display" id="blend-preview">'+cvcBoxes(w.letters,-1)+'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='blend'){
+    var w=WORDS[c.wi];
+    b.innerHTML='<div class="type-badge b-blend">Blending</div>'
+      +audioBtn(w.letters.join('... ')+' ... '+w.word,'Hear the blend')
+      +'<div class="card-instruction">Blend the sounds together.</div>'
+      +'<div class="cvc-display" style="margin:14px 0">'+cvcBoxes(w.letters,-1)+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;justify-content:center">'
+      +w.letters.map(function(l){return'<span style="font-size:20px;font-weight:800;color:#7F77DD">'+l+'</span>';}).join('<span style="font-size:18px;color:#ccc">+</span>')
+      +'<span style="font-size:22px;color:#ccc;margin:0 6px">=</span>'
+      +'<span class="blend-result">'+w.word+'</span>'
+      +'</div>'
+      +'<div class="word-img" style="margin-top:10px">'+w.emoji+'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='mc_pic'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(wi){
+      var w=WORDS[wi];
+      var cl=prev!==undefined?(wi===c.correct?'correct':(wi===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" onclick="pickMC('+wi+','+c.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-img">'+w.emoji+'</span>'
+        +'<span>'+w.word+'</span>'
+        +'</button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Correct! That is a cat!</div>':'<div class="feedback bad">That is '+WORDS[prev].word+'. Find the cat!</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">Choose the picture</div>'
+      +audioBtn(c.q,'Hear question')
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="card-hint">Tap the right picture and word.</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='mc_word'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(wi){
+      var w=WORDS[wi];
+      var cl=prev!==undefined?(wi===c.correct?'correct':(wi===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" onclick="pickMC('+wi+','+c.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-img">'+w.emoji+'</span>'
+        +'<span>'+w.word+'</span>'
+        +'</button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Yes! That is a hat!</div>':'<div class="feedback bad">That is '+WORDS[prev].word+'. Find the hat!</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">Find the picture</div>'
+      +audioBtn('hat','Hear: hat')
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='mc_sound'){
+    var prev=ans[cur];
+    var w=WORDS[c.wi];
+    var btns=c.choices.map(function(l){
+      var cl=prev!==undefined?(l===c.correct?'correct':(l===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" style="font-size:28px;font-weight:900;min-width:72px" onclick="pickSoundMC(\''+l+'\',\''+c.correct+'\')" '+(prev!==undefined?'disabled':'')+'>'+l.toUpperCase()+'</button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Yes! "bat" starts with B!</div>':'<div class="feedback bad">"bat" starts with B.</div>'):'';
+    b.innerHTML='<div class="type-badge b-sound">First sound</div>'
+      +audioBtn('bat','Hear: bat')
+      +'<div class="word-img" style="font-size:52px;margin-bottom:8px">'+w.emoji+'</div>'
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='mc_rhyme'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(w){
+      var cl=prev!==undefined?(w===c.correct?'correct':(w===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" style="font-size:22px;font-weight:900;min-width:90px" onclick="pickRhyme(\''+w+'\',\''+c.correct+'\')" '+(prev!==undefined?'disabled':'')+'>'+w+'</button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Yes! cat and bat both end in -at!</div>':'<div class="feedback bad">bat rhymes with cat. Both end in -at!</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">Find the rhyme</div>'
+      +audioBtn('cat. Which word rhymes with cat?','Hear question')
+      +'<div class="word-big" style="margin-bottom:4px">cat</div>'
+      +'<div class="card-instruction" style="margin-bottom:4px">'+c.q+'</div>'
+      +'<div class="card-hint">Rhyming words end with the same sound.</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='spell'){
+    var w=WORDS[c.wi];
+    var prev=ans[cur];
+    if(prev){
+      var allCorrect=prev===w.word;
+      var slots=w.letters.map(function(l){
+        return '<div class="spell-slot '+(allCorrect?'correct':'wrong')+'">'+l.toUpperCase()+'</div>';
+      }).join('');
+      var fb=allCorrect?'<div class="feedback good">You spelled '+w.word+'! Great work!</div>':'<div class="feedback bad">The word is '+w.word.toUpperCase()+'.</div>';
+      b.innerHTML='<div class="type-badge b-spell">Build-a-word</div>'
+        +'<div class="word-img" style="font-size:52px;margin-bottom:8px">'+w.emoji+'</div>'
+        +'<div class="card-instruction" style="margin-bottom:10px">Spell: '+w.word+'</div>'
+        +'<div class="spell-slots">'+slots+'</div>'+fb;
+    } else {
+      renderSpell(c.wi, c.bank);
+      return;
+    }
+
+  } else if(c.type==='finish'){
+    var total=qCards.length;
+    var pct=Math.round((correct/total)*100);
+    var msg=pct===100?'Perfect reader!':pct>=60?'Great reading!':'Keep practicing!';
+    b.innerHTML='<div style="font-size:60px;margin-bottom:8px">📚</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Deck complete!</div>'
+      +'<div style="font-size:15px;color:#666;margin-bottom:16px">'+msg+'</div>'
+      +'<div class="score-row">'
+      +'<div class="sc"><div class="sc-n">'+correct+'</div><div class="sc-l">Correct</div></div>'
+      +'<div class="sc"><div class="sc-n">'+total+'</div><div class="sc-l">Questions</div></div>'
+      +'<div class="sc"><div class="sc-n">'+pct+'%</div><div class="sc-l">Score</div></div>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<div class="bdg"><div class="bdg-ring">📖</div><div class="bdg-lbl">Short A<br>reader</div></div>'
+      +'<div class="bdg"><div class="bdg-ring">✏️</div><div class="bdg-lbl">Word<br>builder</div></div>'
+      +(pct===100?'<div class="bdg"><div class="bdg-ring">🏆</div><div class="bdg-lbl">Perfect<br>deck!</div></div>':'')
+      +'</div>'
+      +'<button class="replay-btn" onclick="restart()">Play again</button>';
+    document.getElementById('btn-next').disabled=true;
+    document.getElementById('btn-next').textContent='Done';
+  }
+}
+
+// Sound card: tap each letter button
+function tapSound(letter, idx){
+  say(letter);
+  var el=document.getElementById('sb-'+idx);
+  if(el){ el.classList.add('tapped'); setTimeout(function(){el.classList.remove('tapped');},400); }
+}
+
+// Spell card state
+var _spellCur=[], _spellBank=[], _spellTarget='', _spellWi=-1;
+
+function renderSpell(wi, bank){
+  _spellWi=wi;
+  _spellTarget=WORDS[wi].word;
+  if(!_spellCur.length) _spellCur=Array(WORDS[wi].letters.length).fill(null);
+  _spellBank=bank.slice();
+  var w=WORDS[wi];
+  var b=document.getElementById('body');
+
+  var slots=_spellCur.map(function(l,i){
+    var cl=l?'filled':'';
+    return '<div class="spell-slot '+cl+'" id="ss-'+i+'" onclick="removeFromSlot('+i+')">'+(l?l.toUpperCase():'')+'</div>';
+  }).join('');
+
+  var tiles=bank.map(function(l,i){
+    var used=_spellCur.indexOf(l)>=0&&_spellCur.indexOf(l)===_spellCur.lastIndexOf(l)
+      ? false : _spellCur.filter(function(x){return x===l;}).length > bank.filter(function(x){return x===l;}).length-1;
+    // Simple: count how many of this letter are used vs available
+    var usedCount=_spellCur.filter(function(x){return x===l;}).length;
+    var availCount=bank.filter(function(x){return x===l;}).length;
+    var isUsed=(usedCount>0&&i<usedCount);
+    return '<div class="letter-tile '+(isUsed?'used':'')+'" onclick="addToSlot(\''+l+'\','+i+')" id="lt-'+i+'">'+l.toUpperCase()+'</div>';
+  }).join('');
+
+  var allFilled=_spellCur.every(function(x){return x!==null;});
+
+  b.innerHTML='<div class="type-badge b-spell">Build-a-word</div>'
+    +audioBtn(w.word,'Hear word: '+w.word)
+    +'<div class="word-img" style="font-size:52px;margin-bottom:8px">'+w.emoji+'</div>'
+    +'<div class="card-instruction" style="margin-bottom:10px">Spell the word: <span style="color:#534AB7">'+w.word+'</span></div>'
+    +'<div class="spell-slots">'+slots+'</div>'
+    +'<div class="letter-bank" style="margin-bottom:10px">'+tiles+'</div>'
+    +'<button class="spell-check-btn" id="spell-check" onclick="checkSpell()" '+(allFilled?'':'disabled')+'>Check</button>';
+}
+
+var _letterUsed={};
+
+function addToSlot(letter, tileIdx){
+  if(ans[cur]!==undefined) return;
+  var firstEmpty=_spellCur.indexOf(null);
+  if(firstEmpty===-1) return;
+  if(_letterUsed[tileIdx]) return;
+  _spellCur[firstEmpty]=letter;
+  _letterUsed[tileIdx]=true;
+  renderSpell(_spellWi, _spellBank);
+}
+
+function removeFromSlot(slotIdx){
+  if(ans[cur]!==undefined||_spellCur[slotIdx]===null) return;
+  _spellCur[slotIdx]=null;
+  // free up a tile
+  var letter=_spellCur[slotIdx];
+  // rebuild used map
+  _letterUsed={};
+  _spellCur.forEach(function(l,i){
+    if(l!==null){
+      // find which tile corresponds - just rebuild
+    }
+  });
+  renderSpell(_spellWi, _spellBank);
+}
+
+function checkSpell(){
+  var typed=_spellCur.join('');
+  ans[cur]=typed;
+  if(typed===_spellTarget) correct++;
+  _spellCur=[];
+  _letterUsed={};
+  updateChrome();
+  render();
+}
+
+function pickMC(chosen, correctAns){
+  if(ans[cur]!==undefined) return;
+  ans[cur]=chosen;
+  if(chosen===correctAns) correct++;
+  updateChrome(); render();
+}
+function pickSoundMC(chosen, correctAns){
+  if(ans[cur]!==undefined) return;
+  ans[cur]=chosen;
+  if(chosen===correctAns) correct++;
+  updateChrome(); render();
+}
+function pickRhyme(chosen, correctAns){
+  if(ans[cur]!==undefined) return;
+  ans[cur]=chosen;
+  if(chosen===correctAns) correct++;
+  updateChrome(); render();
+}
+
+function goNext(){ if(cur<CARDS.length-1){cur++;_spellCur=[];_letterUsed={};render();} }
+function goBack(){ if(cur>0){cur--;_spellCur=[];_letterUsed={};render();} }
+function restart(){ cur=0;correct=0;ans={};_spellCur=[];_letterUsed={};render(); }
+render();
+</script>
+</body>
+</html>

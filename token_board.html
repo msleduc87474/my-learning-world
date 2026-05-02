@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Token Board — My Learning World</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #f4f1ec;
+  --card:   #ffffff;
+  --ink:    #1c2430;
+  --muted:  #7a8898;
+  --border: #e2ddd6;
+  --r:      16px;
+  --r-lg:   22px;
+  --shadow: 0 4px 20px rgba(0,0,0,.09);
+  --accent: #2e5fa8;
+  --accent-l: #e8f0fc;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Screens ── */
+.screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; padding: 0 0 60px; }
+.screen.active { display: flex; }
+
+/* ══════════════ STUDENT SCREEN ══════════════ */
+.student-screen {
+  background: linear-gradient(175deg, #e8f0fc 0%, #f4f1ec 55%);
+}
+
+/* top bar */
+.top-bar {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px 14px; flex-shrink: 0;
+}
+.tb-name {
+  font-size: 22px; font-weight: 900; color: var(--ink); line-height: 1.15;
+}
+.tb-sub { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 1px; }
+.tb-btns { display: flex; gap: 8px; }
+.tb-btn {
+  width: 40px; height: 40px; border-radius: 11px; border: 1.5px solid var(--border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; transition: background .15s;
+}
+.tb-btn:hover { background: var(--border); }
+
+/* first-then bar */
+.first-then {
+  width: calc(100% - 40px); max-width: 500px;
+  background: var(--card); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); margin-bottom: 22px;
+  display: flex; overflow: hidden; border: 1.5px solid var(--border);
+}
+.ft-half { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
+.ft-half:first-child { border-right: 1.5px solid var(--border); }
+.ft-tag {
+  font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em;
+  padding: 3px 10px; border-radius: 99px; align-self: flex-start;
+}
+.ft-first-tag { background: #e8f0fc; color: #2e5fa8; }
+.ft-then-tag  { background: #e4f7f1; color: #1a7a58; }
+.ft-task {
+  font-size: 16px; font-weight: 800; color: var(--ink); line-height: 1.3;
+  display: flex; align-items: center; gap: 8px;
+}
+.ft-task-icon { font-size: 24px; flex-shrink: 0; }
+.ft-task-text { font-size: 14px; font-weight: 700; color: var(--muted); line-height: 1.4; }
+
+/* token board */
+.board-wrap {
+  width: calc(100% - 40px); max-width: 500px;
+  background: var(--card); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); margin-bottom: 22px;
+  border: 1.5px solid var(--border); padding: 18px 20px;
+}
+.board-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.bh-title { font-size: 13px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+.bh-count { font-size: 13px; font-weight: 800; color: var(--accent); }
+
+.tokens-row {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  min-height: 80px; align-items: center;
+}
+.token {
+  position: relative;
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; cursor: pointer;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+  user-select: none; -webkit-user-select: none;
+  border: 3px solid transparent;
+}
+.token:hover  { transform: scale(1.12); }
+.token:active { transform: scale(.93); }
+.token.empty {
+  background: #f4f1ec; border-color: #e2ddd6;
+  font-size: 0; /* hide emoji when empty */
+  border-style: dashed;
+}
+.token.empty::after {
+  content: ''; width: 24px; height: 24px; border-radius: 50%;
+  background: #e2ddd6;
+}
+.token.filled { animation: popToken .35s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes popToken { 0%{transform:scale(0) rotate(-20deg);opacity:0} 70%{transform:scale(1.2) rotate(5deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+.token.removing { animation: removeToken .3s ease forwards; }
+@keyframes removeToken { to{transform:scale(0);opacity:0} }
+
+/* earn button */
+.earn-btn {
+  width: calc(100% - 40px); max-width: 500px;
+  padding: 20px; border-radius: var(--r-lg); border: none;
+  background: var(--accent); color: white;
+  font-size: 20px; font-weight: 900; font-family: 'Nunito', sans-serif;
+  cursor: pointer; box-shadow: 0 6px 24px rgba(46,95,168,.35);
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), opacity .15s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.earn-btn:hover  { opacity: .92; transform: translateY(-2px); }
+.earn-btn:active { transform: scale(.97); }
+.earn-btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* remove token button */
+.remove-btn {
+  width: calc(100% - 40px); max-width: 500px;
+  padding: 12px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--card); color: var(--muted);
+  font-size: 14px; font-weight: 800; font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: background .15s;
+}
+.remove-btn:hover { background: #fef2f2; color: #c84040; border-color: #fcc; }
+
+/* ══════════════ REWARD SCREEN ══════════════ */
+.reward-screen {
+  background: linear-gradient(160deg, #fffbee 0%, #e8f7f0 100%);
+  justify-content: center; text-align: center; padding: 40px 24px;
+}
+.rw-burst { font-size: 90px; animation: burst .7s cubic-bezier(.34,1.56,.64,1) both; margin-bottom: 16px; }
+@keyframes burst { 0%{transform:scale(0) rotate(-15deg)} 70%{transform:scale(1.2) rotate(8deg)} 100%{transform:scale(1) rotate(0)} }
+.rw-title { font-size: 34px; font-weight: 900; color: #1a7a58; margin-bottom: 10px; line-height: 1.15; }
+.rw-name  { color: var(--ink); }
+.rw-sub   { font-size: 17px; font-weight: 700; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
+.rw-reward {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--card); border-radius: var(--r-lg); padding: 14px 28px;
+  border: 2px solid #9fe1cb; font-size: 20px; font-weight: 900; color: #1a7a58;
+  margin-bottom: 36px; box-shadow: var(--shadow);
+}
+.rw-reward-icon { font-size: 32px; }
+.rw-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.rw-btn {
+  padding: 16px 32px; border-radius: 99px; font-size: 16px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; cursor: pointer; border: none;
+  transition: opacity .15s, transform .12s;
+}
+.rw-btn:active { transform: scale(.97); }
+.rw-btn:hover  { opacity: .88; }
+.rw-primary   { background: #1a7a58; color: white; }
+.rw-secondary { background: var(--card); color: var(--muted); border: 2px solid var(--border); }
+
+/* confetti (CSS only) */
+.confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+.confetti-piece {
+  position: absolute; width: 10px; height: 14px; border-radius: 3px;
+  top: -20px; animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ══════════════ SETUP SCREEN ══════════════ */
+.setup-screen {
+  background: var(--bg);
+}
+.setup-header {
+  width: 100%; padding: 20px 22px 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.setup-title { font-size: 20px; font-weight: 900; color: var(--ink); }
+.setup-back  {
+  padding: 8px 18px; border-radius: 99px; border: 1.5px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 800; color: var(--muted);
+  cursor: pointer; transition: background .15s;
+}
+.setup-back:hover { background: var(--border); }
+
+.setup-form { width: calc(100% - 40px); max-width: 500px; }
+.sf-section { background: var(--card); border-radius: var(--r-lg); border: 1.5px solid var(--border); padding: 18px 20px; margin-bottom: 14px; }
+.sf-label { font-size: 11px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+.sf-field { margin-bottom: 12px; }
+.sf-field:last-child { margin-bottom: 0; }
+.sff-label { font-size: 12px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+.sff-input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+  font-size: 14px; font-weight: 700; font-family: 'Nunito', sans-serif;
+  color: var(--ink); outline: none; transition: border-color .15s;
+}
+.sff-input:focus { border-color: var(--accent); }
+
+/* Token count picker */
+.count-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.count-btn {
+  width: 46px; height: 46px; border-radius: 12px; border: 2px solid var(--border);
+  background: var(--card); font-size: 17px; font-weight: 900; color: var(--muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.count-btn:hover  { border-color: var(--accent); color: var(--accent); }
+.count-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
+
+/* Token style picker */
+.token-style-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+.ts-btn {
+  aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+  cursor: pointer; background: #f8f6f3; transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .15s;
+}
+.ts-btn:hover  { transform: scale(1.14); border-color: var(--accent); }
+.ts-btn.active { border-color: var(--accent); background: var(--accent-l); }
+
+/* Reward picker */
+.reward-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.rp-btn {
+  border-radius: 14px; border: 2px solid var(--border); background: #f8f6f3;
+  padding: 12px 8px; text-align: center; cursor: pointer;
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), border-color .15s;
+}
+.rp-btn:hover  { transform: scale(1.05); border-color: var(--accent); }
+.rp-btn.active { border-color: var(--accent); background: var(--accent-l); }
+.rp-icon  { font-size: 26px; margin-bottom: 4px; }
+.rp-label { font-size: 11px; font-weight: 800; color: var(--muted); line-height: 1.3; }
+
+/* Save button */
+.sf-save {
+  width: 100%; padding: 16px; border-radius: var(--r); border: none;
+  background: var(--accent); color: white; font-size: 17px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(46,95,168,.3);
+  transition: opacity .15s, transform .12s;
+}
+.sf-save:hover  { opacity: .9; }
+.sf-save:active { transform: scale(.98); }
+
+/* Saved boards list */
+.boards-list { width: calc(100% - 40px); max-width: 500px; margin-top: 14px; }
+.board-row {
+  background: var(--card); border-radius: var(--r); border: 1.5px solid var(--border);
+  padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.board-row:hover { border-color: var(--accent); background: var(--accent-l); }
+.br-icon  { font-size: 28px; flex-shrink: 0; }
+.br-name  { font-size: 15px; font-weight: 900; color: var(--ink); }
+.br-meta  { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+.br-arrow { margin-left: auto; font-size: 18px; color: var(--muted); }
+.br-del   {
+  padding: 6px 12px; border-radius: 8px; border: 1.5px solid #fcc; background: transparent;
+  font-size: 12px; font-weight: 800; color: #c84040; cursor: pointer; transition: background .15s;
+}
+.br-del:hover { background: #fff0f0; }
+
+/* ── Helpers ── */
+.full-center { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; text-align: center; }
+.empty-icon  { font-size: 52px; margin-bottom: 12px; opacity: .4; }
+.empty-text  { font-size: 16px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+.empty-sub   { font-size: 13px; font-weight: 600; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ STUDENT VIEW ══════════════ -->
+<div class="screen student-screen active" id="screen-student">
+  <div class="top-bar">
+    <div>
+      <div class="tb-name" id="s-name">Token Board</div>
+      <div class="tb-sub"  id="s-task-label">Work hard to earn tokens!</div>
+    </div>
+    <div class="tb-btns">
+      <div class="tb-btn" onclick="goSetup()" title="Manage boards">⚙️</div>
+    </div>
+  </div>
+
+  <div id="no-board-msg" class="full-center">
+    <div class="empty-icon">🪙</div>
+    <div class="empty-text">No board set up yet</div>
+    <div class="empty-sub" style="margin-bottom:24px">Tap the settings button to create a board for a student.</div>
+    <button style="padding:13px 28px;border-radius:99px;border:none;background:var(--accent);color:white;font-size:15px;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer" onclick="goSetup()">Create a board →</button>
+  </div>
+
+  <div id="board-content" style="display:none;width:100%;display:flex;flex-direction:column;align-items:center">
+    <!-- First-then -->
+    <div class="first-then" id="first-then-bar">
+      <div class="ft-half">
+        <div class="ft-tag ft-first-tag">First</div>
+        <div class="ft-task">
+          <span class="ft-task-icon" id="ft-first-icon">📚</span>
+          <div>
+            <div id="ft-first-text">Work time</div>
+            <div class="ft-task-text" id="ft-first-sub">Complete your activity</div>
+          </div>
+        </div>
+      </div>
+      <div class="ft-half">
+        <div class="ft-tag ft-then-tag">Then</div>
+        <div class="ft-task">
+          <span class="ft-task-icon" id="ft-then-icon">🎉</span>
+          <div>
+            <div id="ft-then-text">Earn your reward!</div>
+            <div class="ft-task-text" id="ft-then-sub">Keep going — you're doing great</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Token board -->
+    <div class="board-wrap">
+      <div class="board-head">
+        <div class="bh-title">My tokens</div>
+        <div class="bh-count" id="bh-count">0 / 5</div>
+      </div>
+      <div class="tokens-row" id="tokens-row"></div>
+    </div>
+
+    <!-- Actions -->
+    <button class="earn-btn" id="earn-btn" onclick="earnToken()">
+      <span id="earn-icon">⭐</span> Earn a token!
+    </button>
+    <button class="remove-btn" id="remove-btn" onclick="removeToken()">Remove last token</button>
+  </div>
+</div>
+
+<!-- ══════════════ REWARD SCREEN ══════════════ -->
+<div class="screen reward-screen" id="screen-reward">
+  <div class="confetti-wrap" id="confetti-wrap"></div>
+  <div class="rw-burst" id="rw-burst">🏆</div>
+  <div class="rw-title">Amazing work, <span class="rw-name" id="rw-name">friend</span>!</div>
+  <div class="rw-sub">You earned all your tokens!<br>Now it's time for your reward.</div>
+  <div class="rw-reward">
+    <span class="rw-reward-icon" id="rw-icon">🎉</span>
+    <span id="rw-reward-text">Your reward</span>
+  </div>
+  <div class="rw-btns">
+    <button class="rw-btn rw-secondary" onclick="resetBoard()">Play again</button>
+    <button class="rw-btn rw-primary"   onclick="resetBoard()">🚀 Back to learning</button>
+  </div>
+</div>
+
+<!-- ══════════════ SETUP SCREEN ══════════════ -->
+<div class="screen setup-screen" id="screen-setup">
+  <div class="setup-header">
+    <div class="setup-title">Board settings</div>
+    <button class="setup-back" onclick="goStudent()">← Back</button>
+  </div>
+
+  <!-- Create new board form -->
+  <div class="setup-form">
+    <div class="sf-section">
+      <div class="sf-label">Student &amp; task</div>
+      <div class="sf-field">
+        <div class="sff-label">Student name</div>
+        <input class="sff-input" id="sf-name" type="text" placeholder="e.g. Alex" maxlength="30">
+      </div>
+      <div class="sf-field">
+        <div class="sff-label">First (task to do)</div>
+        <input class="sff-input" id="sf-first" type="text" placeholder="e.g. Complete my reading" maxlength="40">
+      </div>
+      <div class="sf-field">
+        <div class="sff-label">Reward description</div>
+        <input class="sff-input" id="sf-reward-text" type="text" placeholder="e.g. 5 minutes on the iPad" maxlength="40">
+      </div>
+    </div>
+
+    <div class="sf-section">
+      <div class="sf-label">Number of tokens to earn</div>
+      <div class="count-row" id="count-row">
+        <button class="count-btn" onclick="setCount(this,3)">3</button>
+        <button class="count-btn" onclick="setCount(this,4)">4</button>
+        <button class="count-btn active" onclick="setCount(this,5)">5</button>
+        <button class="count-btn" onclick="setCount(this,6)">6</button>
+        <button class="count-btn" onclick="setCount(this,8)">8</button>
+        <button class="count-btn" onclick="setCount(this,10)">10</button>
+      </div>
+    </div>
+
+    <div class="sf-section">
+      <div class="sf-label">Token style</div>
+      <div class="token-style-grid" id="token-style-grid">
+        <div class="ts-btn active" data-tok="⭐" onclick="setToken(this)">⭐</div>
+        <div class="ts-btn" data-tok="🌟" onclick="setToken(this)">🌟</div>
+        <div class="ts-btn" data-tok="❤️" onclick="setToken(this)">❤️</div>
+        <div class="ts-btn" data-tok="🏆" onclick="setToken(this)">🏆</div>
+        <div class="ts-btn" data-tok="🎯" onclick="setToken(this)">🎯</div>
+        <div class="ts-btn" data-tok="🌈" onclick="setToken(this)">🌈</div>
+        <div class="ts-btn" data-tok="🦋" onclick="setToken(this)">🦋</div>
+        <div class="ts-btn" data-tok="🚀" onclick="setToken(this)">🚀</div>
+        <div class="ts-btn" data-tok="🐱" onclick="setToken(this)">🐱</div>
+        <div class="ts-btn" data-tok="🦕" onclick="setToken(this)">🦕</div>
+        <div class="ts-btn" data-tok="🌻" onclick="setToken(this)">🌻</div>
+        <div class="ts-btn" data-tok="🍎" onclick="setToken(this)">🍎</div>
+        <div class="ts-btn" data-tok="⚽" onclick="setToken(this)">⚽</div>
+        <div class="ts-btn" data-tok="🎵" onclick="setToken(this)">🎵</div>
+        <div class="ts-btn" data-tok="💎" onclick="setToken(this)">💎</div>
+      </div>
+    </div>
+
+    <div class="sf-section">
+      <div class="sf-label">Reward type</div>
+      <div class="reward-grid" id="reward-grid">
+        <div class="rp-btn active" data-ri="🎉" data-rl="Free choice time" onclick="setReward(this)"><div class="rp-icon">🎉</div><div class="rp-label">Free choice time</div></div>
+        <div class="rp-btn" data-ri="📱" data-rl="Screen time" onclick="setReward(this)"><div class="rp-icon">📱</div><div class="rp-label">Screen time</div></div>
+        <div class="rp-btn" data-ri="🎮" data-rl="Game time" onclick="setReward(this)"><div class="rp-icon">🎮</div><div class="rp-label">Game time</div></div>
+        <div class="rp-btn" data-ri="📚" data-rl="Reading time" onclick="setReward(this)"><div class="rp-icon">📚</div><div class="rp-label">Reading time</div></div>
+        <div class="rp-btn" data-ri="🎨" data-rl="Art or drawing" onclick="setReward(this)"><div class="rp-icon">🎨</div><div class="rp-label">Art or drawing</div></div>
+        <div class="rp-btn" data-ri="🧸" data-rl="Toy or fidget" onclick="setReward(this)"><div class="rp-icon">🧸</div><div class="rp-label">Toy or fidget</div></div>
+        <div class="rp-btn" data-ri="🚶" data-rl="Movement break" onclick="setReward(this)"><div class="rp-icon">🚶</div><div class="rp-label">Movement break</div></div>
+        <div class="rp-btn" data-ri="🍎" data-rl="Snack time" onclick="setReward(this)"><div class="rp-icon">🍎</div><div class="rp-label">Snack time</div></div>
+        <div class="rp-btn" data-ri="⭐" data-rl="Sticker or prize" onclick="setReward(this)"><div class="rp-icon">⭐</div><div class="rp-label">Sticker or prize</div></div>
+      </div>
+    </div>
+
+    <!-- Token colour -->
+    <div class="sf-section">
+      <div class="sf-label">Board accent colour</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="ts-btn active" style="width:40px;height:40px;border-radius:12px;background:#2e5fa8;border-color:#2e5fa8" data-tc="#2e5fa8" onclick="setAccent(this,'#2e5fa8','#e8f0fc')"></div>
+        <div class="ts-btn" style="width:40px;height:40px;border-radius:12px;background:#1a7a58" data-tc="#1a7a58" onclick="setAccent(this,'#1a7a58','#e4f7f1')"></div>
+        <div class="ts-btn" style="width:40px;height:40px;border-radius:12px;background:#5346c8" data-tc="#5346c8" onclick="setAccent(this,'#5346c8','#eeecfb')"></div>
+        <div class="ts-btn" style="width:40px;height:40px;border-radius:12px;background:#a03060" data-tc="#a03060" onclick="setAccent(this,'#a03060','#fdf0f5')"></div>
+        <div class="ts-btn" style="width:40px;height:40px;border-radius:12px;background:#9a5a0a" data-tc="#9a5a0a" onclick="setAccent(this,'#9a5a0a','#fef5e4')"></div>
+        <div class="ts-btn" style="width:40px;height:40px;border-radius:12px;background:#2e7d32" data-tc="#2e7d32" onclick="setAccent(this,'#2e7d32','#e8f5e9')"></div>
+      </div>
+    </div>
+
+    <button class="sf-save" onclick="saveBoard()">Save board →</button>
+  </div>
+
+  <!-- Saved boards -->
+  <div class="boards-list" id="boards-list"></div>
+</div>
+
+<script>
+/* ══════════════════════════ STATE ══════════════════════════ */
+var STORE = 'mlw_tokens_v1';
+var ACTIVE = 'mlw_active_board';
+
+var _cfg = {
+  name: '', first: '', rewardText: '', rewardIcon: '🎉',
+  tokenEmoji: '⭐', tokenCount: 5,
+  accent: '#2e5fa8', accentL: '#e8f0fc'
+};
+var _earned = 0;
+var _boards = [];
+var _activeId = null;
+
+/* ══════════════════════════ STORAGE ══════════════════════════ */
+function loadBoards(){ try{ return JSON.parse(localStorage.getItem(STORE)||'[]'); }catch(e){ return []; } }
+function saveBoards(b){ try{ localStorage.setItem(STORE,JSON.stringify(b)); }catch(e){} }
+function genId(){ return 'b'+Date.now(); }
+
+/* ══════════════════════════ SCREENS ══════════════════════════ */
+function goStudent(){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-student').classList.add('active');
+  renderStudentBoard();
+}
+function goSetup(){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-setup').classList.add('active');
+  renderBoardsList();
+}
+function goReward(){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-reward').classList.add('active');
+  document.getElementById('rw-name').textContent  = _cfg.name || 'you';
+  document.getElementById('rw-icon').textContent  = _cfg.rewardIcon;
+  document.getElementById('rw-reward-text').textContent = _cfg.rewardText || 'Your reward';
+  document.getElementById('rw-burst').textContent = _cfg.rewardIcon;
+  launchConfetti();
+}
+
+/* ══════════════════════════ STUDENT BOARD ══════════════════════════ */
+function renderStudentBoard(){
+  _boards = loadBoards();
+  if(!_boards.length){
+    document.getElementById('no-board-msg').style.display = 'flex';
+    document.getElementById('board-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('no-board-msg').style.display = 'none';
+  document.getElementById('board-content').style.display = 'flex';
+
+  // Load active board
+  var id = localStorage.getItem(ACTIVE);
+  var board = _boards.find(function(b){ return b.id===id; }) || _boards[0];
+  _activeId = board.id;
+  _cfg = JSON.parse(JSON.stringify(board));
+  if(!_earned) _earned = 0;
+
+  applyAccent(_cfg.accent, _cfg.accentL);
+
+  document.getElementById('s-name').textContent = _cfg.name ? _cfg.name + '\'s Token Board' : 'Token Board';
+  document.getElementById('s-task-label').textContent = 'Work hard to earn tokens!';
+  document.getElementById('ft-first-icon').textContent = '📋';
+  document.getElementById('ft-first-text').textContent = _cfg.first || 'Complete your activity';
+  document.getElementById('ft-then-icon').textContent  = _cfg.rewardIcon;
+  document.getElementById('ft-then-text').textContent  = _cfg.rewardText || 'Your reward!';
+  document.getElementById('ft-then-sub').textContent   = 'Keep going — you\'re doing great';
+
+  renderTokens();
+}
+
+function renderTokens(){
+  var row = document.getElementById('tokens-row');
+  var count = document.getElementById('bh-count');
+  count.textContent = _earned + ' / ' + _cfg.tokenCount;
+  row.innerHTML = '';
+  for(var i = 0; i < _cfg.tokenCount; i++){
+    var t = document.createElement('div');
+    t.className = 'token ' + (i < _earned ? 'filled' : 'empty');
+    t.textContent = i < _earned ? _cfg.tokenEmoji : '';
+    t.style.background = i < _earned ? _cfg.accentL : '';
+    t.style.borderColor = i < _earned ? _cfg.accent : '';
+    row.appendChild(t);
+  }
+  var earnBtn = document.getElementById('earn-btn');
+  earnBtn.disabled = _earned >= _cfg.tokenCount;
+  document.getElementById('earn-icon').textContent = _cfg.tokenEmoji;
+  earnBtn.style.background = _cfg.accent;
+}
+
+function earnToken(){
+  if(_earned >= _cfg.tokenCount) return;
+  _earned++;
+  renderTokens();
+  if(_earned >= _cfg.tokenCount){
+    setTimeout(goReward, 700);
+  }
+}
+
+function removeToken(){
+  if(_earned <= 0) return;
+  var tokens = document.querySelectorAll('.token.filled');
+  var last = tokens[tokens.length - 1];
+  if(last){
+    last.classList.add('removing');
+    setTimeout(function(){
+      _earned = Math.max(0, _earned - 1);
+      renderTokens();
+    }, 280);
+  }
+}
+
+function resetBoard(){
+  _earned = 0;
+  goStudent();
+}
+
+/* ══════════════════════════ CONFETTI ══════════════════════════ */
+function launchConfetti(){
+  var wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  var colours = ['#2e5fa8','#1a7a58','#f0a500','#d4537e','#5346c8','#f5c400'];
+  for(var i = 0; i < 60; i++){
+    var p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colours[Math.floor(Math.random()*colours.length)];
+    p.style.width  = (8+Math.random()*8) + 'px';
+    p.style.height = (10+Math.random()*12) + 'px';
+    p.style.borderRadius = Math.random()>0.5 ? '50%' : '3px';
+    p.style.animationDuration  = (1.8+Math.random()*2) + 's';
+    p.style.animationDelay     = (Math.random()*.8) + 's';
+    p.style.opacity = 0.9 + Math.random()*.1;
+    wrap.appendChild(p);
+  }
+}
+
+/* ══════════════════════════ SETUP FORM ══════════════════════════ */
+var _setupCount  = 5;
+var _setupToken  = '⭐';
+var _setupRIcon  = '🎉';
+var _setupAccent = '#2e5fa8';
+var _setupAccentL= '#e8f0fc';
+
+function setCount(btn, n){
+  _setupCount = n;
+  document.querySelectorAll('#count-row .count-btn').forEach(function(b){ b.classList.remove('active'); b.style.borderColor=''; b.style.color=''; b.style.background=''; });
+  btn.classList.add('active');
+  btn.style.borderColor = _setupAccent;
+  btn.style.color       = _setupAccent;
+  btn.style.background  = _setupAccentL;
+}
+function setToken(btn){
+  _setupToken = btn.dataset.tok;
+  document.querySelectorAll('#token-style-grid .ts-btn').forEach(function(b){ b.classList.remove('active'); b.style.borderColor=''; b.style.background=''; });
+  btn.classList.add('active');
+  btn.style.borderColor = _setupAccent;
+  btn.style.background  = _setupAccentL;
+}
+function setReward(btn){
+  _setupRIcon = btn.dataset.ri;
+  document.querySelectorAll('#reward-grid .rp-btn').forEach(function(b){ b.classList.remove('active'); b.style.borderColor=''; b.style.background=''; });
+  btn.classList.add('active');
+  btn.style.borderColor = _setupAccent;
+  btn.style.background  = _setupAccentL;
+  // Update reward text field if empty
+  if(!document.getElementById('sf-reward-text').value){
+    document.getElementById('sf-reward-text').value = btn.dataset.rl;
+  }
+}
+function setAccent(btn, col, light){
+  _setupAccent  = col;
+  _setupAccentL = light;
+  document.querySelectorAll('.sf-section .ts-btn[data-tc]').forEach(function(b){ b.classList.remove('active'); b.style.borderColor = b.dataset.tc||''; });
+  btn.classList.add('active');
+  btn.style.borderColor = col;
+}
+
+function saveBoard(){
+  var name = document.getElementById('sf-name').value.trim();
+  if(!name){ alert('Please enter a student name.'); return; }
+  var boards = loadBoards();
+  var board = {
+    id:          genId(),
+    name:        name,
+    first:       document.getElementById('sf-first').value.trim()||'Complete your activity',
+    rewardText:  document.getElementById('sf-reward-text').value.trim()||'Your reward',
+    rewardIcon:  _setupRIcon,
+    tokenEmoji:  _setupToken,
+    tokenCount:  _setupCount,
+    accent:      _setupAccent,
+    accentL:     _setupAccentL
+  };
+  boards.push(board);
+  saveBoards(boards);
+  localStorage.setItem(ACTIVE, board.id);
+  _earned = 0;
+  document.getElementById('sf-name').value = '';
+  document.getElementById('sf-first').value = '';
+  document.getElementById('sf-reward-text').value = '';
+  renderBoardsList();
+  goStudent();
+}
+
+function renderBoardsList(){
+  var boards = loadBoards();
+  var el = document.getElementById('boards-list');
+  if(!boards.length){ el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Saved boards — tap to load</div>'
+  + boards.map(function(b){
+    var isActive = localStorage.getItem(ACTIVE)===b.id;
+    return '<div class="board-row" onclick="loadBoard(\''+b.id+'\')" style="'+(isActive?'border-color:'+b.accent+';background:'+b.accentL:'')+'">'+
+      '<span class="br-icon">'+b.tokenEmoji+'</span>'+
+      '<div>'+
+        '<div class="br-name">'+b.name+'</div>'+
+        '<div class="br-meta">'+b.tokenCount+' tokens · Reward: '+b.rewardText+'</div>'+
+      '</div>'+
+      '<button class="br-del" onclick="event.stopPropagation();deleteBoard(\''+b.id+'\')">Delete</button>'+
+      '<span class="br-arrow">'+(isActive?'✓':'›')+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+function loadBoard(id){
+  localStorage.setItem(ACTIVE, id);
+  _earned = 0;
+  goStudent();
+}
+
+function deleteBoard(id){
+  if(!confirm('Delete this board?')) return;
+  var boards = loadBoards().filter(function(b){ return b.id!==id; });
+  saveBoards(boards);
+  if(localStorage.getItem(ACTIVE)===id){
+    localStorage.removeItem(ACTIVE);
+    _earned = 0;
+  }
+  renderBoardsList();
+}
+
+/* ══════════════════════════ ACCENT ══════════════════════════ */
+function applyAccent(col, light){
+  document.documentElement.style.setProperty('--accent',   col);
+  document.documentElement.style.setProperty('--accent-l', light);
+}
+
+/* ══════════════════════════ INIT ══════════════════════════ */
+renderStudentBoard();
+</script>
+</body>
+</html>

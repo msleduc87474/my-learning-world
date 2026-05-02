@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Counting Garden — Printable Worksheet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @media print {
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    .page { box-shadow: none !important; margin: 0 !important; }
+    @page { margin: 0.5in; size: letter; }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+  .page {
+    background: white;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px 40px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+
+  /* Print button */
+  .no-print {
+    max-width: 720px;
+    margin: 0 auto 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .print-btn {
+    padding: 10px 22px;
+    background: #185FA5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .print-btn:hover { background: #0C447C; }
+  .note { font-size: 13px; color: #666; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2.5px solid #185FA5; }
+  .header-left { }
+  .header-title { font-size: 22px; font-weight: 800; color: #185FA5; }
+  .header-sub { font-size: 13px; color: #666; margin-top: 2px; }
+  .header-badge {
+    background: #E1F5EE;
+    border: 2px solid #1D9E75;
+    border-radius: 10px;
+    padding: 8px 14px;
+    text-align: center;
+  }
+  .hb-label { font-size: 10px; color: #085041; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .hb-name { font-size: 12px; color: #0F6E56; font-weight: 700; }
+
+  /* Name/date line */
+  .info-row { display: flex; gap: 24px; margin-bottom: 22px; }
+  .info-field { flex: 1; }
+  .info-label { font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .info-line { border-bottom: 1.5px solid #ccc; height: 28px; }
+
+  /* Section heading */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    margin-top: 22px;
+  }
+  .section-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #185FA5; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+  .section-inst { font-size: 12px; color: #888; margin-left: 36px; margin-bottom: 14px; }
+
+  /* Activity 1: trace & count */
+  .trace-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
+  .trace-card {
+    border: 2px solid #e0e8ff;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    background: #f8faff;
+  }
+  .trace-objects { font-size: 20px; letter-spacing: 2px; margin-bottom: 6px; min-height: 26px; }
+  .trace-number {
+    font-size: 28px; font-weight: 800; color: #c8d8f0;
+    border-bottom: 2px dashed #c8d8f0;
+    margin: 0 4px 4px;
+    letter-spacing: 2px;
+    font-family: 'Arial', sans-serif;
+  }
+  .trace-word { font-size: 10px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* Activity 2: count and circle */
+  .count-rows { display: flex; flex-direction: column; gap: 14px; }
+  .count-row { display: flex; align-items: center; gap: 16px; border: 1.5px solid #eee; border-radius: 10px; padding: 10px 14px; }
+  .count-label { font-size: 13px; font-weight: 600; color: #444; min-width: 90px; }
+  .count-objects { flex: 1; font-size: 22px; letter-spacing: 4px; }
+  .count-choices { display: flex; gap: 8px; }
+  .cc { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #555; }
+
+  /* Activity 3: draw it */
+  .draw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .draw-card {
+    border: 2px dashed #d0d0d0;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .draw-prompt { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; text-align: center; }
+  .draw-area { flex: 1; width: 100%; background: #fafafa; border-radius: 6px; border: 1px solid #eee; min-height: 70px; }
+  .draw-num { font-size: 28px; font-weight: 800; color: #185FA5; margin-bottom: 4px; }
+
+  /* Activity 4: match */
+  .match-wrap { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 0; align-items: start; }
+  .match-col { display: flex; flex-direction: column; gap: 10px; }
+  .match-lines-col { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+  .match-item {
+    border: 2px solid #e0e8ff;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    background: #f8faff;
+  }
+  .match-dot { height: 36px; display: flex; align-items: center; justify-content: center; }
+  .mdot { width: 8px; height: 8px; border-radius: 50%; background: #185FA5; }
+
+  /* QR section */
+  .qr-section {
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: #f0f5ff;
+    border-radius: 12px;
+    border: 1.5px solid #c0d4f0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .qr-box {
+    width: 60px; height: 60px;
+    border: 2px solid #185FA5;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 8px);
+    gap: 1px;
+    padding: 4px;
+  }
+  .qc { width: 8px; height: 8px; background: #185FA5; border-radius: 1px; }
+  .qe { width: 8px; height: 8px; background: transparent; }
+  .qr-text { }
+  .qr-title { font-size: 13px; font-weight: 700; color: #185FA5; margin-bottom: 2px; }
+  .qr-sub { font-size: 12px; color: #555; line-height: 1.4; }
+
+  /* Stars rating */
+  .rating-section { margin-top: 20px; border-top: 1.5px solid #eee; padding-top: 14px; display: flex; align-items: center; gap: 16px; }
+  .rating-label { font-size: 12px; color: #888; font-weight: 600; }
+  .stars { display: flex; gap: 8px; }
+  .star { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #FAEEDA; background: #fffbf5; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+  /* Footer */
+  .footer { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #eee; }
+  .footer-text { font-size: 10px; color: #bbb; }
+  .footer-badge { font-size: 10px; color: #1D9E75; font-weight: 600; background: #E1F5EE; padding: 3px 10px; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <button class="print-btn" onclick="window.print()">Print worksheet</button>
+  <span class="note">Use your browser's print dialog · Best on letter/A4 paper</span>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">The Counting Garden</div>
+      <div class="header-sub">Math · Number Sense · Level 1 · Counting 1–5</div>
+    </div>
+    <div class="header-badge">
+      <div class="hb-label">Companion to</div>
+      <div class="hb-name">Digital lesson</div>
+    </div>
+  </div>
+
+  <!-- Name / Date -->
+  <div class="info-row">
+    <div class="info-field"><div class="info-label">Student name</div><div class="info-line"></div></div>
+    <div class="info-field"><div class="info-label">Date</div><div class="info-line"></div></div>
+    <div class="info-field" style="max-width:120px"><div class="info-label">Score</div><div class="info-line"></div></div>
+  </div>
+
+  <!-- Activity 1 -->
+  <div class="section-head">
+    <div class="section-num">1</div>
+    <div class="section-title">Trace the number and count the objects</div>
+  </div>
+  <div class="section-inst">Trace over the light number with your pencil, then count the pictures out loud.</div>
+  <div class="trace-grid">
+    <div class="trace-card">
+      <div class="trace-objects">🍎</div>
+      <div class="trace-number">1</div>
+      <div class="trace-word">one</div>
+    </div>
+    <div class="trace-card">
+      <div class="trace-objects">🌻🌻</div>
+      <div class="trace-number">2</div>
+      <div class="trace-word">two</div>
+    </div>
+    <div class="trace-card">
+      <div class="trace-objects">🐸🐸🐸</div>
+      <div class="trace-number">3</div>
+      <div class="trace-word">three</div>
+    </div>
+    <div class="trace-card">
+      <div class="trace-objects">🐱🐱🐱🐱</div>
+      <div class="trace-number">4</div>
+      <div class="trace-word">four</div>
+    </div>
+    <div class="trace-card">
+      <div class="trace-objects">⭐⭐⭐⭐⭐</div>
+      <div class="trace-number">5</div>
+      <div class="trace-word">five</div>
+    </div>
+  </div>
+
+  <!-- Activity 2 -->
+  <div class="section-head" style="margin-top:24px">
+    <div class="section-num">2</div>
+    <div class="section-title">Count and circle the right number</div>
+  </div>
+  <div class="section-inst">Count the pictures in each row, then circle the correct number.</div>
+  <div class="count-rows">
+    <div class="count-row">
+      <div class="count-label">How many?</div>
+      <div class="count-objects">🍎🍎🍎</div>
+      <div class="count-choices">
+        <div class="cc">2</div><div class="cc">3</div><div class="cc">4</div>
+      </div>
+    </div>
+    <div class="count-row">
+      <div class="count-label">How many?</div>
+      <div class="count-objects">🌻🌻🌻🌻🌻</div>
+      <div class="count-choices">
+        <div class="cc">4</div><div class="cc">5</div><div class="cc">6</div>
+      </div>
+    </div>
+    <div class="count-row">
+      <div class="count-label">How many?</div>
+      <div class="count-objects">🐱</div>
+      <div class="count-choices">
+        <div class="cc">1</div><div class="cc">2</div><div class="cc">3</div>
+      </div>
+    </div>
+    <div class="count-row">
+      <div class="count-label">How many?</div>
+      <div class="count-objects">⭐⭐⭐⭐</div>
+      <div class="count-choices">
+        <div class="cc">3</div><div class="cc">4</div><div class="cc">5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity 3 -->
+  <div class="section-head" style="margin-top:24px">
+    <div class="section-num">3</div>
+    <div class="section-title">Draw the right number of objects</div>
+  </div>
+  <div class="section-inst">Draw simple circles or dots to show each number. You can use any shape!</div>
+  <div class="draw-grid">
+    <div class="draw-card">
+      <div class="draw-num">2</div>
+      <div class="draw-prompt">Draw 2 things</div>
+      <div class="draw-area"></div>
+    </div>
+    <div class="draw-card">
+      <div class="draw-num">4</div>
+      <div class="draw-prompt">Draw 4 things</div>
+      <div class="draw-area"></div>
+    </div>
+    <div class="draw-card">
+      <div class="draw-num">5</div>
+      <div class="draw-prompt">Draw 5 things</div>
+      <div class="draw-area"></div>
+    </div>
+  </div>
+
+  <!-- Activity 4 -->
+  <div class="section-head" style="margin-top:24px">
+    <div class="section-num">4</div>
+    <div class="section-title">Match the number to the word</div>
+  </div>
+  <div class="section-inst">Draw a line from each number on the left to its matching word on the right.</div>
+  <div class="match-wrap">
+    <div class="match-col">
+      <div class="match-item">1</div>
+      <div class="match-item">3</div>
+      <div class="match-item">5</div>
+      <div class="match-item">2</div>
+      <div class="match-item">4</div>
+    </div>
+    <div class="match-lines-col">
+      <div class="match-dot"><div class="mdot"></div></div>
+      <div class="match-dot"><div class="mdot"></div></div>
+      <div class="match-dot"><div class="mdot"></div></div>
+      <div class="match-dot"><div class="mdot"></div></div>
+      <div class="match-dot"><div class="mdot"></div></div>
+    </div>
+    <div class="match-col">
+      <div class="match-item">four</div>
+      <div class="match-item">one</div>
+      <div class="match-item">two</div>
+      <div class="match-item">five</div>
+      <div class="match-item">three</div>
+    </div>
+  </div>
+
+  <!-- QR code placeholder -->
+  <div class="qr-section">
+    <div class="qr-box">
+      <div style="font-size:28px">QR</div>
+    </div>
+    <div class="qr-text">
+      <div class="qr-title">Scan to play the digital lesson</div>
+      <div class="qr-sub">Place your Genially lesson URL here as a QR code.<br>Students scan with a tablet to go straight to the interactive game.</div>
+    </div>
+  </div>
+
+  <!-- Self-rating -->
+  <div class="rating-section">
+    <div class="rating-label">How do you feel about counting today?</div>
+    <div class="stars">
+      <div class="star">🙁</div>
+      <div class="star">😐</div>
+      <div class="star">🙂</div>
+      <div class="star">😊</div>
+      <div class="star">😄</div>
+    </div>
+    <div style="font-size:12px;color:#aaa;margin-left:auto">Circle one</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-text">The Counting Garden · Math · Number Sense · Level 1 · countinggarden.edu</span>
+    <span class="footer-badge">Companion to digital lesson</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Learning World — Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --math:   #185FA5; --math-l:   #E6F1FB; --math-b:   #B5D4F4;
+    --sci:    #0F6E56; --sci-l:    #E1F5EE; --sci-b:    #9FE1CB;
+    --lit:    #534AB7; --lit-l:    #EEEDFE; --lit-b:    #AFA9EC;
+    --emreg:  #993556; --emreg-l:  #FBEAF0; --emreg-b:  #F4C0D1;
+    --social: #854F0B; --social-l: #FAEEDA; --social-b: #FAC775;
+    --life:   #3B6D11; --life-l:   #EAF3DE; --life-b:   #97C459;
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #e8e4df;
+    --text: #1a1a2e;
+    --muted: #888;
+    --r: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: #1a1a2e;
+    display: flex; flex-direction: column; padding: 24px 16px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sb-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+  .sb-logo-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg,#185FA5,#534AB7); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .sb-logo-text { font-size: 13px; font-weight: 900; color: #fff; line-height: 1.2; }
+  .sb-logo-sub  { font-size: 10px; color: rgba(255,255,255,.45); font-weight: 600; }
+  .sb-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; padding-left: 4px; }
+  .sb-nav { display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px;
+    cursor: pointer; color: rgba(255,255,255,.6); font-size: 13px; font-weight: 700;
+    transition: background .15s, color .15s; border: none; background: transparent; width: 100%; text-align: left;
+  }
+  .sb-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.9); }
+  .sb-item.active { background: rgba(255,255,255,.12); color: #fff; }
+  .sb-item-icon { font-size: 16px; flex-shrink: 0; }
+  .sb-pillar { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; transition: background .15s; color: rgba(255,255,255,.55); border: none; background: transparent; width: 100%; text-align: left; }
+  .sb-pillar:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
+  .sb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sb-spacer { flex: 1; }
+  .sb-footer { border-top: 1px solid rgba(255,255,255,.08); padding-top: 16px; }
+  .sb-teacher { display: flex; align-items: center; gap: 9px; }
+  .sb-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#185FA5,#534AB7); display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; font-weight: 800; flex-shrink: 0; }
+  .sb-tname { font-size: 12px; font-weight: 800; color: #fff; }
+  .sb-trole  { font-size: 10px; color: rgba(255,255,255,.4); font-weight: 600; }
+
+  /* ── Main ── */
+  .main { flex: 1; padding: 28px 28px 48px; min-width: 0; overflow-x: hidden; }
+
+  /* ── Page header ── */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 22px; font-weight: 900; color: var(--text); }
+  .page-sub   { font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn { padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; border: none; font-family: 'Nunito', sans-serif; transition: opacity .15s, transform .1s; display: flex; align-items: center; gap: 6px; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: #1a1a2e; color: #fff; }
+  .btn-secondary { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+  .btn:hover { opacity: .88; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border-radius: var(--r); padding: 16px 18px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+  .sc-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+  .sc-value { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; }
+  .sc-sub   { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+  .sc-trend { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-top: 4px; }
+  .trend-up   { background: #E1F5EE; color: #085041; }
+  .trend-mid  { background: #FAEEDA; color: #633806; }
+  .trend-none { background: #f0f0f0; color: #888; }
+
+  /* ── Section card ── */
+  .section-card { background: var(--card); border-radius: var(--r); box-shadow: var(--shadow); border: 1.5px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+  .section-card-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1.5px solid var(--border); }
+  .sch-title { font-size: 15px; font-weight: 900; color: var(--text); }
+  .sch-sub   { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 1px; }
+  .sch-actions { display: flex; gap: 8px; }
+
+  /* ── Student table ── */
+  .student-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .student-table th { padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1.5px solid var(--border); white-space: nowrap; }
+  .student-table td { padding: 12px 14px; border-bottom: 1px solid #f4f0eb; vertical-align: middle; }
+  .student-table tr:last-child td { border-bottom: none; }
+  .student-table tr:hover td { background: #faf8f5; }
+  .student-name { font-weight: 800; font-size: 14px; color: var(--text); }
+  .student-meta { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 1px; }
+
+  /* pillar mini progress dots */
+  .pillar-dots { display: flex; gap: 4px; }
+  .p-dot { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: default; }
+  .p-dot.done    { }
+  .p-dot.partial { opacity: .6; }
+  .p-dot.none    { background: #f0f0f0 !important; color: #ccc; }
+
+  /* mini progress bar */
+  .mini-bar { height: 7px; background: #f0f0f0; border-radius: 4px; overflow: hidden; min-width: 80px; }
+  .mini-fill { height: 100%; border-radius: 4px; }
+
+  /* score badge */
+  .score-badge { display: inline-block; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+
+  /* action icon */
+  .action-btns { display: flex; gap: 6px; }
+  .action-btn { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: background .15s; }
+  .action-btn:hover { background: #f4f0eb; }
+
+  /* ── Pillar heatmap ── */
+  .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 12px; padding: 18px 20px; }
+  .hm-card { border-radius: 12px; padding: 14px 12px; text-align: center; border: 1.5px solid; }
+  .hm-icon  { font-size: 24px; margin-bottom: 5px; }
+  .hm-name  { font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+  .hm-big   { font-size: 26px; font-weight: 900; line-height: 1; margin-bottom: 2px; }
+  .hm-sub   { font-size: 10px; font-weight: 700; opacity: .7; }
+  .hm-bar   { height: 5px; border-radius: 3px; margin-top: 8px; background: rgba(0,0,0,.1); overflow: hidden; }
+  .hm-fill  { height: 100%; border-radius: 3px; }
+
+  /* ── Notes panel ── */
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; padding: 18px 20px; }
+  .note-card  { border-radius: 12px; border: 1.5px solid var(--border); padding: 12px 14px; background: #fefefe; }
+  .note-name  { font-size: 13px; font-weight: 900; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .note-text  { font-size: 12px; color: #555; line-height: 1.5; min-height: 48px; }
+  .note-edit  { width: 100%; margin-top: 8px; font-size: 12px; padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Nunito',sans-serif; color: var(--text); resize: none; outline: none; }
+  .note-edit:focus { border-color: #185FA5; }
+
+  /* ── Modals ── */
+  .overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .overlay.hidden { display: none; }
+  .modal { background: white; border-radius: 20px; padding: 26px 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+  .modal-title { font-size: 19px; font-weight: 900; color: var(--text); margin-bottom: 16px; }
+  .field-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; margin-top: 12px; }
+  .field-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--border); font-size: 14px; font-weight: 700; font-family: 'Nunito',sans-serif; color: var(--text); outline: none; transition: border-color .15s; }
+  .field-input:focus { border-color: #185FA5; }
+  .field-select { width: 100%; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--border); font-size: 14px; font-weight: 700; font-family: 'Nunito',sans-serif; color: var(--text); outline: none; background: white; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .pillar-progress-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-top: 4px; }
+  .pp-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--border); cursor: pointer; transition: background .12s; }
+  .pp-item:hover { background: #f8f8f8; }
+  .pp-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #ccc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .pp-check.on { background: #1D9E75; border-color: #1D9E75; color: white; }
+  .pp-icon  { font-size: 16px; }
+  .pp-label { font-size: 12px; font-weight: 700; color: var(--text); flex: 1; }
+  .pp-score { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 700; font-family: 'Nunito',sans-serif; text-align: center; }
+
+  /* ── Views ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .empty-icon  { font-size: 48px; margin-bottom: 12px; opacity: .5; }
+  .empty-text  { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .empty-sub   { font-size: 13px; font-weight: 600; }
+
+  /* ── Tags ── */
+  .tag { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .main { padding: 18px 14px 40px; }
+    .stat-row { grid-template-columns: repeat(2,1fr); }
+    .pillar-dots { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Add/Edit Student Modal -->
+<div class="overlay hidden" id="student-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add student</div>
+    <div class="field-label">Student name</div>
+    <input class="field-input" id="f-name" type="text" placeholder="e.g. Alex Smith" autocomplete="off">
+    <div class="field-label">Group / class</div>
+    <input class="field-input" id="f-group" type="text" placeholder="e.g. Blue group">
+    <div class="field-label">Support needs (optional)</div>
+    <input class="field-input" id="f-needs" type="text" placeholder="e.g. AAC user, visual schedule">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Progress Modal -->
+<div class="overlay hidden" id="progress-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">Update progress — <span id="pm-name"></span></div>
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:14px">Tap each pillar to mark as visited. You can also enter a score.</div>
+    <div class="pillar-progress-grid" id="pm-grid"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeProgressModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProgress()">Save progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div class="overlay hidden" id="notes-modal">
+  <div class="modal">
+    <div class="modal-title">Notes — <span id="nm-name"></span></div>
+    <div class="field-label">Teacher notes</div>
+    <textarea class="field-input" id="nm-text" rows="5" placeholder="Add observations, goals, or notes about this student..." style="resize:vertical"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('notes-modal').classList.add('hidden')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNotes()">Save notes</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">📊</div>
+      <div>
+        <div class="sb-logo-text">Teacher<br>Dashboard</div>
+        <div class="sb-logo-sub">My Learning World</div>
+      </div>
+    </div>
+
+    <div class="sb-label">Navigation</div>
+    <div class="sb-nav">
+      <button class="sb-item active" onclick="showView('overview')" id="nav-overview">
+        <span class="sb-item-icon">🏠</span> Overview
+      </button>
+      <button class="sb-item" onclick="showView('students')" id="nav-students">
+        <span class="sb-item-icon">👥</span> All students
+      </button>
+      <button class="sb-item" onclick="showView('pillars')" id="nav-pillars">
+        <span class="sb-item-icon">📈</span> Pillar progress
+      </button>
+      <button class="sb-item" onclick="showView('notes')" id="nav-notes">
+        <span class="sb-item-icon">📝</span> Notes
+      </button>
+    </div>
+
+    <div class="sb-label">Pillars</div>
+    <div class="sb-nav">
+      <button class="sb-pillar"><div class="sb-dot" style="background:#378ADD"></div>Math</button>
+      <button class="sb-pillar"><div class="sb-dot" style="background:#1D9E75"></div>Science</button>
+      <button class="sb-pillar"><div class="sb-dot" style="background:#7F77DD"></div>Literacy</button>
+      <button class="sb-pillar"><div class="sb-dot" style="background:#D4537E"></div>Feelings</button>
+      <button class="sb-pillar"><div class="sb-dot" style="background:#BA7517"></div>Social</button>
+      <button class="sb-pillar"><div class="sb-dot" style="background:#639922"></div>Life Skills</button>
+    </div>
+
+    <div class="sb-spacer"></div>
+    <div class="sb-footer">
+      <div class="sb-teacher">
+        <div class="sb-avatar" id="sb-initials">T</div>
+        <div>
+          <div class="sb-tname" id="sb-tname">Teacher</div>
+          <div class="sb-trole">Class educator</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- ── Overview ── -->
+    <div class="view active" id="view-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Class overview</div>
+          <div class="page-sub" id="ov-date"></div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-primary" onclick="openAddStudent()">+ Add student</button>
+        </div>
+      </div>
+
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="section-card">
+        <div class="section-card-head">
+          <div>
+            <div class="sch-title">Student roster</div>
+            <div class="sch-sub">All students with pillar progress at a glance</div>
+          </div>
+          <div class="sch-actions">
+            <input id="search-input" type="text" placeholder="Search students..." style="padding:7px 12px;border-radius:9px;border:1.5px solid var(--border);font-size:13px;font-family:'Nunito',sans-serif;outline:none;width:180px" oninput="renderTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="student-table" id="student-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Group</th>
+                <th>Pillars</th>
+                <th>Overall</th>
+                <th>Last active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div id="table-empty" class="empty-state hidden">
+          <div class="empty-icon">👥</div>
+          <div class="empty-text">No students yet</div>
+          <div class="empty-sub">Click "Add student" to get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Students detail ── -->
+    <div class="view" id="view-students">
+      <div class="page-header">
+        <div>
+          <div class="page-title">All students</div>
+          <div class="page-sub">Detailed view of every student's progress</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openAddStudent()">+ Add student</button>
+        </div>
+      </div>
+      <div id="student-cards-wrap"></div>
+    </div>
+
+    <!-- ── Pillar progress ── -->
+    <div class="view" id="view-pillars">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Pillar progress</div>
+          <div class="page-sub">Class-wide completion rates across all six pillars</div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="sch-title">Class heatmap</div>
+          <div class="sch-sub">Average completion rate per pillar</div>
+        </div>
+        <div class="heatmap-grid" id="heatmap-grid"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="sch-title">Per-student breakdown</div>
+          <div class="sch-sub">See how each student is performing across pillars</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="student-table" id="pillar-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th style="color:#185FA5">🔢 Math</th>
+                <th style="color:#0F6E56">🔬 Science</th>
+                <th style="color:#534AB7">📖 Literacy</th>
+                <th style="color:#993556">💛 Feelings</th>
+                <th style="color:#854F0B">🤝 Social</th>
+                <th style="color:#3B6D11">🏠 Life</th>
+              </tr>
+            </thead>
+            <tbody id="pillar-body"></tbody>
+          </table>
+          <div id="pillar-empty" class="empty-state hidden">
+            <div class="empty-icon">📈</div>
+            <div class="empty-text">No students yet</div>
+            <div class="empty-sub">Add students to see pillar breakdown.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Notes ── -->
+    <div class="view" id="view-notes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Teacher notes</div>
+          <div class="page-sub">Observations, goals and reminders per student</div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="sch-title">Student notes</div>
+          <div class="sch-sub">Click a note card to edit</div>
+        </div>
+        <div class="notes-grid" id="notes-grid"></div>
+        <div id="notes-empty" class="empty-state hidden">
+          <div class="empty-icon">📝</div>
+          <div class="empty-text">No students yet</div>
+          <div class="empty-sub">Add students to start writing notes.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var STORE_KEY = 'mlw_teacher_v2';
+var PILLARS = [
+  { id:'math',   label:'Math',       icon:'🔢', color:'#185FA5', light:'#E6F1FB', border:'#B5D4F4' },
+  { id:'sci',    label:'Science',    icon:'🔬', color:'#0F6E56', light:'#E1F5EE', border:'#9FE1CB' },
+  { id:'lit',    label:'Literacy',   icon:'📖', color:'#534AB7', light:'#EEEDFE', border:'#AFA9EC' },
+  { id:'emreg',  label:'Feelings',   icon:'💛', color:'#993556', light:'#FBEAF0', border:'#F4C0D1' },
+  { id:'social', label:'Social',     icon:'🤝', color:'#854F0B', light:'#FAEEDA', border:'#FAC775' },
+  { id:'life',   label:'Life Skills',icon:'🏠', color:'#3B6D11', light:'#EAF3DE', border:'#97C459' }
+];
+
+/* ── Data layer ── */
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'{"students":[],"teacher":"Teacher"}'); }catch(e){ return {students:[],teacher:'Teacher'}; } }
+function save(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
+function genId(){ return 's'+Date.now()+Math.floor(Math.random()*1000); }
+
+var _editId = null, _progressId = null, _notesId = null;
+
+/* ── Init ── */
+(function(){
+  var d = load();
+  var tname = d.teacher||'Teacher';
+  document.getElementById('sb-tname').textContent = tname;
+  document.getElementById('sb-initials').textContent = tname.charAt(0).toUpperCase();
+  document.getElementById('ov-date').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Demo data if empty
+  if(!d.students || d.students.length===0){
+    d.students = [
+      { id:genId(), name:'Alex M.', group:'Blue group', needs:'Visual schedule support', progress:{math:80,sci:60,lit:40,emreg:100,social:60,life:20}, notes:'Making great progress with emotional regulation. May benefit from more structured literacy support.', lastActive: daysAgo(1) },
+      { id:genId(), name:'Jordan T.', group:'Blue group', needs:'AAC user', progress:{math:60,sci:80,lit:60,emreg:60,social:40,life:60}, notes:'Strong science engagement. Pair with peer buddy for social skills practice.', lastActive: daysAgo(2) },
+      { id:genId(), name:'Sam R.', group:'Red group', needs:'Sensory breaks every 20 min', progress:{math:40,sci:40,lit:80,emreg:40,social:80,life:40}, notes:'Excellent phonics reader. Needs prompting for life skills and hygiene routines.', lastActive: daysAgo(0) },
+      { id:genId(), name:'Mia K.', group:'Red group', needs:'Reduced noise environment', progress:{math:100,sci:60,lit:60,emreg:80,social:60,life:80}, notes:'Completed math deck perfectly! Consider moving to Level 2 for maths.', lastActive: daysAgo(3) },
+      { id:genId(), name:'Finn O.', group:'Green group', needs:'Fine motor support', progress:{math:20,sci:20,lit:20,emreg:20,social:20,life:20}, notes:'New student. Still getting settled. Observe for 2 more weeks before formal assessment.', lastActive: daysAgo(5) }
+    ];
+    save(d);
+  }
+
+  renderAll();
+})();
+
+function daysAgo(n){
+  var d = new Date(); d.setDate(d.getDate()-n);
+  return d.toISOString();
+}
+
+function relativeDate(iso){
+  if(!iso) return '—';
+  var diff = Math.floor((Date.now()-new Date(iso))/(1000*60*60*24));
+  if(diff===0) return 'Today';
+  if(diff===1) return 'Yesterday';
+  if(diff<7)   return diff+'d ago';
+  return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+/* ── Views ── */
+function showView(v){
+  document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('nav-'+v).classList.add('active');
+  renderAll();
+}
+
+/* ── Render all ── */
+function renderAll(){
+  renderStats();
+  renderTable();
+  renderStudentCards();
+  renderHeatmap();
+  renderPillarTable();
+  renderNotes();
+}
+
+/* ── Stats ── */
+function renderStats(){
+  var d = load();
+  var students = d.students||[];
+  var total = students.length;
+  var allProgress = students.map(function(s){
+    var vals = PILLARS.map(function(p){ return (s.progress&&s.progress[p.id])||0; });
+    return vals.reduce(function(a,b){return a+b;},0)/vals.length;
+  });
+  var avgProgress = total ? Math.round(allProgress.reduce(function(a,b){return a+b;},0)/total) : 0;
+  var completedAny = students.filter(function(s){
+    return PILLARS.some(function(p){ return (s.progress&&s.progress[p.id]||0)>=80; });
+  }).length;
+  var needsAttention = students.filter(function(s){
+    var vals = PILLARS.map(function(p){ return (s.progress&&s.progress[p.id])||0; });
+    return vals.reduce(function(a,b){return a+b;},0)/vals.length < 30;
+  }).length;
+
+  var el = document.getElementById('stat-row');
+  el.innerHTML = [
+    { label:'Total students', value:total, sub:'In your class', trend:total?'trend-up':'trend-none', ttext: total?'Active':'No students yet' },
+    { label:'Avg. overall progress', value:avgProgress+'%', sub:'Across all pillars', trend:avgProgress>=60?'trend-up':avgProgress>=30?'trend-mid':'trend-none', ttext:avgProgress>=60?'On track':avgProgress>=30?'Developing':'Getting started' },
+    { label:'Students progressing', value:completedAny, sub:'≥1 pillar at 80%+', trend:completedAny?'trend-up':'trend-none', ttext:completedAny?completedAny+' students':'None yet' },
+    { label:'Needs attention', value:needsAttention, sub:'Below 30% overall', trend:needsAttention?'trend-mid':'trend-up', ttext:needsAttention?'Review soon':'All on track' }
+  ].map(function(s){
+    return '<div class="stat-card"><div class="sc-label">'+s.label+'</div><div class="sc-value">'+s.value+'</div><div class="sc-sub">'+s.sub+'</div><span class="sc-trend '+s.trend+'">'+s.ttext+'</span></div>';
+  }).join('');
+}
+
+/* ── Roster table ── */
+function renderTable(){
+  var d = load();
+  var q = (document.getElementById('search-input')||{value:''}).value.toLowerCase();
+  var students = (d.students||[]).filter(function(s){ return s.name.toLowerCase().indexOf(q)>=0 || (s.group||'').toLowerCase().indexOf(q)>=0; });
+  var tbody = document.getElementById('table-body');
+  var empty = document.getElementById('table-empty');
+  if(!students.length){ tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML = students.map(function(s){
+    var vals = PILLARS.map(function(p){ return (s.progress&&s.progress[p.id])||0; });
+    var overall = Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);
+    var dots = PILLARS.map(function(p){
+      var v=(s.progress&&s.progress[p.id])||0;
+      var cl=v>=80?'done':v>=30?'partial':'none';
+      return '<div class="p-dot '+cl+'" style="background:'+(v>=80?p.light:v>=30?p.light:'')+';" title="'+p.label+': '+v+'%"><span style="color:'+p.color+'">'+p.icon+'</span></div>';
+    }).join('');
+    var badgeColor = overall>=70?'#E1F5EE;color:#085041':overall>=40?'#FAEEDA;color:#633806':'#f0f0f0;color:#888';
+    var needs = s.needs ? '<div class="student-meta">'+s.needs+'</div>' : '';
+    return '<tr>'
+      +'<td><div class="student-name">'+s.name+'</div>'+needs+'</td>'
+      +'<td><span class="tag" style="background:#f0f0f0;color:#555">'+(s.group||'—')+'</span></td>'
+      +'<td><div class="pillar-dots">'+dots+'</div></td>'
+      +'<td><div style="display:flex;align-items:center;gap:8px"><div class="mini-bar" style="flex:1"><div class="mini-fill" style="width:'+overall+'%;background:#1D9E75"></div></div><span class="score-badge" style="background:'+badgeColor+'">'+overall+'%</span></div></td>'
+      +'<td style="color:var(--muted);font-size:12px;font-weight:700">'+relativeDate(s.lastActive)+'</td>'
+      +'<td><div class="action-btns">'
+      +'<button class="action-btn" title="Update progress" onclick="openProgress(\''+s.id+'\')">📊</button>'
+      +'<button class="action-btn" title="Edit student" onclick="openEdit(\''+s.id+'\')">✏️</button>'
+      +'<button class="action-btn" title="Add note" onclick="openNotes(\''+s.id+'\')">📝</button>'
+      +'<button class="action-btn" title="Delete" onclick="deleteStudent(\''+s.id+'\')">🗑️</button>'
+      +'</div></td>'
+      +'</tr>';
+  }).join('');
+}
+
+/* ── Student detail cards ── */
+function renderStudentCards(){
+  var d = load();
+  var wrap = document.getElementById('student-cards-wrap');
+  if(!d.students||!d.students.length){
+    wrap.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">No students yet</div><div class="empty-sub">Click "Add student" to get started.</div></div>';
+    return;
+  }
+  wrap.innerHTML = d.students.map(function(s){
+    var vals = PILLARS.map(function(p){ return (s.progress&&s.progress[p.id])||0; });
+    var overall = Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);
+    var bars = PILLARS.map(function(p){
+      var v=(s.progress&&s.progress[p.id])||0;
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">'
+        +'<div style="width:20px;text-align:center;font-size:14px">'+p.icon+'</div>'
+        +'<div style="flex:1"><div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+v+'%;background:'+p.color+';border-radius:4px;transition:width .5s"></div></div></div>'
+        +'<span style="font-size:11px;font-weight:800;color:'+p.color+';min-width:32px;text-align:right">'+v+'%</span>'
+        +'</div>';
+    }).join('');
+    var initials = s.name.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    return '<div class="section-card" style="margin-bottom:16px">'
+      +'<div class="section-card-head">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#185FA5,#534AB7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:900">'+initials+'</div>'
+      +'<div><div class="sch-title">'+s.name+'</div><div class="sch-sub">'+(s.group||'No group')+(s.needs?' · '+s.needs:'')+'</div></div>'
+      +'</div>'
+      +'<div class="sch-actions">'
+      +'<span style="font-size:13px;font-weight:900;color:'+( overall>=70?'#085041':overall>=40?'#633806':'#888')+'">'+overall+'% overall</span>'
+      +'<button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openProgress(\''+s.id+'\')">Update</button>'
+      +'</div></div>'
+      +'<div style="padding:16px 20px">'+bars+'</div>'
+      +(s.notes?'<div style="padding:0 20px 16px;font-size:12px;color:#666;font-style:italic;border-top:1px solid #f4f0eb;padding-top:12px;margin-top:0">📝 '+s.notes+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+/* ── Heatmap ── */
+function renderHeatmap(){
+  var d = load();
+  var students = d.students||[];
+  var el = document.getElementById('heatmap-grid');
+  if(!students.length){ el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px;font-weight:700">No students yet.</div>'; return; }
+  el.innerHTML = PILLARS.map(function(p){
+    var vals = students.map(function(s){ return (s.progress&&s.progress[p.id])||0; });
+    var avg = Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);
+    var done = vals.filter(function(v){return v>=80;}).length;
+    return '<div class="hm-card" style="background:'+p.light+';border-color:'+p.border+'">'
+      +'<div class="hm-icon">'+p.icon+'</div>'
+      +'<div class="hm-name" style="color:'+p.color+'">'+p.label+'</div>'
+      +'<div class="hm-big" style="color:'+p.color+'">'+avg+'%</div>'
+      +'<div class="hm-sub" style="color:'+p.color+'">avg. completion</div>'
+      +'<div style="font-size:11px;font-weight:800;color:'+p.color+';margin-top:4px">'+done+' / '+students.length+' at 80%+</div>'
+      +'<div class="hm-bar"><div class="hm-fill" style="width:'+avg+'%;background:'+p.color+'"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ── Pillar table ── */
+function renderPillarTable(){
+  var d = load();
+  var students = d.students||[];
+  var tbody = document.getElementById('pillar-body');
+  var empty = document.getElementById('pillar-empty');
+  if(!students.length){ tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML = students.map(function(s){
+    var cells = PILLARS.map(function(p){
+      var v=(s.progress&&s.progress[p.id])||0;
+      var bg=v>=80?p.light:v>=40?'#fafafa':'#fff';
+      var col=v>=80?p.color:v>=40?'#888':'#ccc';
+      return '<td style="text-align:center"><span class="score-badge" style="background:'+bg+';color:'+col+'">'+v+'%</span></td>';
+    }).join('');
+    return '<tr><td><div class="student-name">'+s.name+'</div><div class="student-meta">'+(s.group||'')+'</div></td>'+cells+'</tr>';
+  }).join('');
+}
+
+/* ── Notes ── */
+function renderNotes(){
+  var d = load();
+  var students = d.students||[];
+  var el = document.getElementById('notes-grid');
+  var empty = document.getElementById('notes-empty');
+  if(!students.length){ el.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  el.innerHTML = students.map(function(s){
+    return '<div class="note-card">'
+      +'<div class="note-name">'+s.name
+      +'<button class="action-btn" onclick="openNotes(\''+s.id+'\')" style="font-size:12px">✏️</button></div>'
+      +'<div class="note-text" style="color:'+(s.notes?'#444':'#ccc')+';">'+(s.notes||'No notes yet. Click the pencil to add a note.')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ── Add/Edit student ── */
+function openAddStudent(){
+  _editId=null;
+  document.getElementById('modal-title').textContent='Add student';
+  document.getElementById('f-name').value='';
+  document.getElementById('f-group').value='';
+  document.getElementById('f-needs').value='';
+  document.getElementById('student-modal').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('f-name').focus(); },80);
+}
+function openEdit(id){
+  var d=load(); var s=d.students.find(function(x){return x.id===id;});
+  if(!s) return;
+  _editId=id;
+  document.getElementById('modal-title').textContent='Edit student';
+  document.getElementById('f-name').value=s.name;
+  document.getElementById('f-group').value=s.group||'';
+  document.getElementById('f-needs').value=s.needs||'';
+  document.getElementById('student-modal').classList.remove('hidden');
+}
+function closeModal(){ document.getElementById('student-modal').classList.add('hidden'); }
+function saveStudent(){
+  var name = document.getElementById('f-name').value.trim();
+  if(!name) return;
+  var d=load();
+  if(_editId){
+    d.students=d.students.map(function(s){
+      return s.id===_editId ? Object.assign({},s,{name:name,group:document.getElementById('f-group').value.trim(),needs:document.getElementById('f-needs').value.trim()}) : s;
+    });
+  } else {
+    var progress={};
+    PILLARS.forEach(function(p){progress[p.id]=0;});
+    d.students.push({id:genId(),name:name,group:document.getElementById('f-group').value.trim(),needs:document.getElementById('f-needs').value.trim(),progress:progress,notes:'',lastActive:new Date().toISOString()});
+  }
+  save(d); closeModal(); renderAll();
+}
+function deleteStudent(id){
+  if(!confirm('Remove this student? This cannot be undone.')) return;
+  var d=load(); d.students=d.students.filter(function(s){return s.id!==id;}); save(d); renderAll();
+}
+
+/* ── Progress modal ── */
+function openProgress(id){
+  var d=load(); var s=d.students.find(function(x){return x.id===id;});
+  if(!s) return;
+  _progressId=id;
+  document.getElementById('pm-name').textContent=s.name;
+  var grid=document.getElementById('pm-grid');
+  grid.innerHTML=PILLARS.map(function(p){
+    var v=(s.progress&&s.progress[p.id])||0;
+    return '<div style="border-radius:10px;border:1.5px solid '+p.border+';padding:10px 12px;background:'+p.light+'">'
+      +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">'
+      +'<span style="font-size:16px">'+p.icon+'</span>'
+      +'<span style="font-size:12px;font-weight:900;color:'+p.color+'">'+p.label+'</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +'<button onclick="setPct(\''+p.id+'\',0)" class="pct-btn" id="pb-'+p.id+'-0" style="flex:1;padding:5px 0;border-radius:7px;border:1.5px solid '+p.border+';background:'+(v===0?p.color:'white')+';color:'+(v===0?'white':p.color)+';font-size:11px;font-weight:800;cursor:pointer;transition:all .12s">0%</button>'
+      +'<button onclick="setPct(\''+p.id+'\',35)" class="pct-btn" id="pb-'+p.id+'-35" style="flex:1;padding:5px 0;border-radius:7px;border:1.5px solid '+p.border+';background:'+(v===35?p.color:'white')+';color:'+(v===35?'white':p.color)+';font-size:11px;font-weight:800;cursor:pointer;transition:all .12s">35%</button>'
+      +'<button onclick="setPct(\''+p.id+'\',70)" class="pct-btn" id="pb-'+p.id+'-70" style="flex:1;padding:5px 0;border-radius:7px;border:1.5px solid '+p.border+';background:'+(v===70?p.color:'white')+';color:'+(v===70?'white':p.color)+';font-size:11px;font-weight:800;cursor:pointer;transition:all .12s">70%</button>'
+      +'<button onclick="setPct(\''+p.id+'\',100)" class="pct-btn" id="pb-'+p.id+'-100" style="flex:1;padding:5px 0;border-radius:7px;border:1.5px solid '+p.border+';background:'+(v===100?p.color:'white')+';color:'+(v===100?'white':p.color)+';font-size:11px;font-weight:800;cursor:pointer;transition:all .12s">100%</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  document.getElementById('progress-modal').classList.remove('hidden');
+}
+var _pmChanges={};
+function setPct(pillar, val){
+  if(!_pmChanges) _pmChanges={};
+  _pmChanges[pillar]=val;
+  // update button styles
+  var d=load(); var s=d.students.find(function(x){return x.id===_progressId;});
+  var p=PILLARS.find(function(x){return x.id===pillar;});
+  if(!p) return;
+  [0,35,70,100].forEach(function(pct){
+    var btn=document.getElementById('pb-'+pillar+'-'+pct);
+    if(!btn) return;
+    btn.style.background = pct===val ? p.color : 'white';
+    btn.style.color       = pct===val ? 'white' : p.color;
+  });
+}
+function closeProgressModal(){ document.getElementById('progress-modal').classList.add('hidden'); _pmChanges={}; }
+function saveProgress(){
+  if(!_progressId) return;
+  var d=load();
+  d.students=d.students.map(function(s){
+    if(s.id!==_progressId) return s;
+    var pr=Object.assign({},s.progress||{});
+    Object.keys(_pmChanges).forEach(function(k){ pr[k]=_pmChanges[k]; });
+    return Object.assign({},s,{progress:pr,lastActive:new Date().toISOString()});
+  });
+  save(d); _pmChanges={}; closeProgressModal(); renderAll();
+}
+
+/* ── Notes ── */
+function openNotes(id){
+  var d=load(); var s=d.students.find(function(x){return x.id===id;});
+  if(!s) return;
+  _notesId=id;
+  document.getElementById('nm-name').textContent=s.name;
+  document.getElementById('nm-text').value=s.notes||'';
+  document.getElementById('notes-modal').classList.remove('hidden');
+}
+function saveNotes(){
+  if(!_notesId) return;
+  var d=load();
+  d.students=d.students.map(function(s){
+    return s.id===_notesId ? Object.assign({},s,{notes:document.getElementById('nm-text').value.trim()}) : s;
+  });
+  save(d); _notesId=null;
+  document.getElementById('notes-modal').classList.add('hidden');
+  renderAll();
+}
+
+/* ── Export CSV ── */
+function exportCSV(){
+  var d=load(); var students=d.students||[];
+  var header=['Name','Group','Support needs'].concat(PILLARS.map(function(p){return p.label;})).concat(['Overall %','Last active']);
+  var rows=students.map(function(s){
+    var vals=PILLARS.map(function(p){return (s.progress&&s.progress[p.id])||0;});
+    var overall=Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);
+    return [s.name,s.group||'',s.needs||''].concat(vals).concat([overall,relativeDate(s.lastActive)]);
+  });
+  var csv=[header].concat(rows).map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='mlw_class_progress.csv'; a.click();
+}
+
+/* ── Close overlays on bg click ── */
+['student-modal','progress-modal','notes-modal'].forEach(function(id){
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) this.classList.add('hidden'); });
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    ['student-modal','progress-modal','notes-modal'].forEach(function(id){
+      document.getElementById(id).classList.add('hidden');
+    });
+  }
+});
+</script>
+</body>
+</html>

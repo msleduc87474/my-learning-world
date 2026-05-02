@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Being a Good Friend — Social Skills · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1e1a2e;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .chrome { width: 100%; max-width: 580px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+  .deck-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); }
+  .card-ctr   { font-size: 13px; color: rgba(255,255,255,.5); }
+  .score-chip { background: #f0a500; border-radius: 99px; padding: 4px 13px; font-size: 12px; font-weight: 700; color: #fff; }
+  .prog-track { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,.15); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: #f4a3c0; border-radius: 3px; transition: width .5s ease; }
+
+  .card { width: 100%; max-width: 580px; background: #fff; border-radius: 20px; overflow: hidden; min-height: 460px; display: flex; flex-direction: column; }
+  .stripe { height: 8px; transition: background .4s; }
+  .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 22px 14px; text-align: center; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-top: 1.5px solid #f0f0f0; }
+  .fn-back { padding: 10px 22px; border-radius: 99px; border: 2px solid #ddd; background: transparent; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
+  .fn-back:disabled { opacity: .3; cursor: default; }
+  .fn-back:not(:disabled):hover { background: #f5f5f5; }
+  .fn-next { padding: 10px 28px; border-radius: 99px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; color: #fff; background: #993556; }
+  .fn-next:disabled { opacity: .4; cursor: default; }
+  .fn-next:not(:disabled):hover { filter: brightness(1.12); }
+
+  .type-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  .b-learn   { background: #FBEAF0; color: #72243E; }
+  .b-greet   { background: #E6F1FB; color: #0C447C; }
+  .b-bubble  { background: #EAF3DE; color: #27500A; }
+  .b-scene   { background: #FAEEDA; color: #633806; }
+  .b-cue     { background: #EEEDFE; color: #3C3489; }
+  .b-turn    { background: #E1F5EE; color: #085041; }
+
+  .audio-btn { display: flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 99px; border: 2px solid #f4c0d1; background: #fdf0f5; font-size: 13px; font-weight: 600; color: #993556; cursor: pointer; margin-bottom: 14px; }
+  .audio-btn:hover { background: #f4c0d1; }
+  .spk { width: 18px; height: 18px; }
+
+  .card-instruction { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.3; }
+  .card-hint        { font-size: 13px; color: #888; margin-bottom: 16px; }
+
+  /* Person SVG avatars */
+  .avatar-row { display: flex; align-items: flex-end; justify-content: center; gap: 20px; margin: 10px 0 16px; }
+  .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .avatar-name { font-size: 12px; font-weight: 700; color: #666; }
+
+  /* Speech bubble */
+  .speech-scene { position: relative; width: 100%; max-width: 380px; margin-bottom: 14px; }
+  .bubble {
+    border-radius: 16px; padding: 11px 16px;
+    font-size: 15px; font-weight: 600; color: #1a1a2e;
+    border: 2px solid; display: inline-block; max-width: 240px;
+    position: relative; text-align: left; line-height: 1.5;
+  }
+  .bubble::after {
+    content: ''; position: absolute; bottom: -12px; left: 20px;
+    border-left: 10px solid transparent; border-right: 10px solid transparent;
+    border-top: 12px solid;
+  }
+  .bubble.right::after { left: auto; right: 20px; }
+  .bubble-pink  { background: #FBEAF0; border-color: #D4537E; }
+  .bubble-pink::after { border-top-color: #D4537E; }
+  .bubble-blue  { background: #E6F1FB; border-color: #378ADD; }
+  .bubble-blue::after { border-top-color: #378ADD; }
+  .bubble-green { background: #E1F5EE; border-color: #1D9E75; }
+  .bubble-green::after { border-top-color: #1D9E75; }
+
+  /* Multiple choice */
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    min-width: 120px; padding: 11px 14px; border-radius: 14px;
+    border: 3px solid #dde4f0; background: #fff;
+    font-size: 14px; font-weight: 600; color: #1a1a2e;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    transition: transform .1s, border-color .15s, background .15s; line-height: 1.4; text-align: center;
+  }
+  .choice-icon { font-size: 26px; }
+  .choice:not(:disabled):hover  { transform: scale(1.06); border-color: #D4537E; }
+  .choice:not(:disabled):active { transform: scale(.93); }
+  .choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Speech bubble choice */
+  .bubble-choices { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }
+  .bubble-choice {
+    padding: 11px 16px; border-radius: 14px; border: 3px solid #dde4f0;
+    background: #fff; font-size: 14px; font-weight: 600; color: #1a1a2e;
+    cursor: pointer; text-align: left; line-height: 1.5;
+    transition: transform .1s, border-color .15s, background .15s;
+  }
+  .bubble-choice:not(:disabled):hover  { transform: scale(1.02); border-color: #D4537E; }
+  .bubble-choice:not(:disabled):active { transform: scale(.98); }
+  .bubble-choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .bubble-choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Turn-taking visual */
+  .turn-track { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 380px; margin-bottom: 12px; }
+  .turn-row   { display: flex; align-items: flex-start; gap: 10px; }
+  .turn-row.right { flex-direction: row-reverse; }
+  .turn-avatar { font-size: 28px; flex-shrink: 0; }
+  .turn-bubble { border-radius: 14px; padding: 9px 14px; font-size: 13px; font-weight: 600; border: 2px solid; line-height: 1.4; max-width: 240px; }
+  .turn-blank  { border-radius: 14px; padding: 9px 14px; font-size: 13px; font-weight: 600; border: 2.5px dashed; line-height: 1.4; min-width: 140px; color: #bbb; background: #fafafa; }
+
+  /* Social cue card */
+  .cue-scene { background: #f8f4ff; border-radius: 16px; padding: 16px; width: 100%; max-width: 360px; margin-bottom: 14px; border: 2px solid #d0cbf6; }
+  .cue-scene-text { font-size: 14px; color: #333; line-height: 1.6; text-align: left; }
+  .cue-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+
+  /* Rule cards */
+  .rules-list { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+  .rule-item  { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-radius: 12px; border: 2px solid; background: #fff; font-size: 13px; font-weight: 600; line-height: 1.5; text-align: left; }
+  .rule-icon  { font-size: 22px; flex-shrink: 0; }
+
+  .feedback { font-size: 15px; font-weight: 700; margin-top: 12px; min-height: 22px; }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Finish */
+  .score-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .sc   { border-radius: 14px; padding: 14px 18px; text-align: center; border: 2px solid; min-width: 82px; }
+  .sc-n { font-size: 28px; font-weight: 800; }
+  .sc-l { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+  .badges { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bdg   { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bdg-ring { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .bdg-lbl  { font-size: 10px; color: #888; text-align: center; line-height: 1.3; max-width: 64px; }
+  .replay-btn { padding: 12px 32px; border-radius: 99px; border: 2.5px solid #993556; background: transparent; color: #993556; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .replay-btn:hover { background: #fdf0f5; }
+
+  @keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="deck-title">Being a Good Friend</span>
+  <span class="card-ctr" id="ctr">Card 1 of 17</span>
+  <span class="score-chip" id="chip">0 / 0</span>
+</div>
+<div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="card">
+  <div class="stripe" id="stripe"></div>
+  <div class="card-body" id="body"></div>
+  <div class="card-footer">
+    <button class="fn-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span style="font-size:12px;color:#bbb"></span>
+    <button class="fn-next" id="btn-next" onclick="goNext()">Start deck</button>
+  </div>
+</div>
+
+<script>
+var cur=0, correct=0, ans={};
+
+function avatarSVG(color, face, size) {
+  size = size || 64;
+  var faceMap = {
+    happy:   'M20 32 Q30 42 40 32',
+    neutral: 'M20 34 L40 34',
+    sad:     'M20 38 Q30 28 40 38',
+    wave:    'M20 32 Q30 42 40 32',
+    talking: 'M18 34 Q30 44 42 34'
+  };
+  var mouth = faceMap[face] || faceMap.happy;
+  var colors = { pink:'#D4537E', blue:'#378ADD', teal:'#1D9E75', amber:'#BA7517', purple:'#7F77DD' };
+  var c = colors[color] || colors.pink;
+  var light = { pink:'#FBEAF0', blue:'#E6F1FB', teal:'#E1F5EE', amber:'#FAEEDA', purple:'#EEEDFE' };
+  var lc = light[color] || light.pink;
+  return '<svg viewBox="0 0 60 80" width="'+(size*.75)+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg">'
+    // body
+    +'<rect x="12" y="46" width="36" height="30" rx="10" fill="'+c+'"/>'
+    // head
+    +'<circle cx="30" cy="30" r="18" fill="'+lc+'" stroke="'+c+'" stroke-width="2"/>'
+    // eyes
+    +'<circle cx="23" cy="28" r="3" fill="'+c+'"/>'
+    +'<circle cx="37" cy="28" r="3" fill="'+c+'"/>'
+    // mouth
+    +'<path d="'+mouth+'" stroke="'+c+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+    +(face==='wave'?'<path d="M46 18 Q52 12 56 18 Q60 24 54 28" stroke="'+c+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>':'')
+    +'</svg>';
+}
+
+var GREETINGS = [
+  { situation: 'You see a friend at school in the morning.', correct: 0, choices: ['"Hi! Good morning!"', '"Go away."', 'Say nothing and walk past.', '"I don\'t want to talk."'] },
+  { situation: 'You are leaving school at the end of the day.', correct: 1, choices: ['"Hello, nice to meet you!"', '"Goodbye! See you tomorrow!"', '"Stop talking to me."', 'Walk out without saying anything.'] },
+  { situation: 'You meet your teacher for the first time.', correct: 2, choices: ['"Whatever."', '"I know you already."', '"Hello, my name is ___. Nice to meet you!"', '"Don\'t look at me."'] }
+];
+
+var TURN_CARDS = [
+  {
+    context: 'Maya says: "I love dogs. Do you have a pet?"',
+    speaker: 'Maya', color: 'pink', face: 'talking',
+    correct: 0,
+    choices: ['"Yes! I have a cat named Mango. What is your dog\'s name?"', '"I don\'t care about your dog."', 'Walk away and say nothing.', '"Stop talking about dogs."']
+  },
+  {
+    context: 'Sam is telling a story. He hasn\'t finished yet.',
+    speaker: 'Sam', color: 'blue', face: 'talking',
+    correct: 1,
+    choices: ['Start talking about something completely different.', 'Listen quietly and wait for Sam to finish.', 'Walk away.', 'Shout over Sam.']
+  }
+];
+
+var SCENE_CARDS = [
+  {
+    scene: 'Your friend is playing with a toy you really want to use. They look happy playing with it.',
+    question: 'What is the best thing to do?',
+    correct: 1,
+    choices: [
+      { icon: '😠', text: 'Grab the toy and take it.' },
+      { icon: '🙂', text: 'Ask politely: "Can I have a turn when you\'re done?"' },
+      { icon: '😢', text: 'Walk away and cry.' },
+      { icon: '🗣️', text: 'Tell an adult your friend is mean.' }
+    ]
+  },
+  {
+    scene: 'You accidentally bump into someone and they drop their book.',
+    question: 'What should you say?',
+    correct: 2,
+    choices: [
+      { icon: '🚶', text: 'Keep walking. Pretend it didn\'t happen.' },
+      { icon: '😠', text: '"It\'s your fault for being in the way."' },
+      { icon: '😊', text: '"I\'m sorry! Are you okay? Let me help you pick it up."' },
+      { icon: '😶', text: 'Stand still and say nothing.' }
+    ]
+  }
+];
+
+var CUE_CARDS = [
+  {
+    desc: 'Your friend has their arms crossed, is looking down at the floor, and their mouth is turned down.',
+    question: 'How might your friend be feeling?',
+    correct: 1,
+    choices: [
+      { icon: '🤩', text: 'Excited and happy' },
+      { icon: '😢', text: 'Sad or upset' },
+      { icon: '😴', text: 'Tired and relaxed' },
+      { icon: '😂', text: 'Finding something funny' }
+    ]
+  },
+  {
+    desc: 'A classmate waves at you from across the room and smiles with their eyebrows raised.',
+    question: 'What does this probably mean?',
+    correct: 0,
+    choices: [
+      { icon: '👋', text: 'They want to say hello or get your attention.' },
+      { icon: '😠', text: 'They are angry at you.' },
+      { icon: '😕', text: 'They are confused or lost.' },
+      { icon: '😴', text: 'They want you to be quiet.' }
+    ]
+  }
+];
+
+var CARDS = [
+  { type: 'intro' },
+  { type: 'learn_greet' },
+  { type: 'greet_mc', gi: 0 },
+  { type: 'greet_mc', gi: 1 },
+  { type: 'greet_mc', gi: 2 },
+  { type: 'learn_turn' },
+  { type: 'turn_mc', ti: 0 },
+  { type: 'turn_mc', ti: 1 },
+  { type: 'learn_cue' },
+  { type: 'cue_mc', ci: 0 },
+  { type: 'cue_mc', ci: 1 },
+  { type: 'learn_scene' },
+  { type: 'scene_mc', si: 0 },
+  { type: 'scene_mc', si: 1 },
+  { type: 'learn_rules' },
+  { type: 'bubble_complete' },
+  { type: 'finish' }
+];
+
+var quizTypes = ['greet_mc','turn_mc','cue_mc','scene_mc','bubble_complete'];
+var qCards = CARDS.filter(function(c){ return quizTypes.indexOf(c.type)>=0; });
+
+function stripeColor(t) {
+  if(t==='learn_greet'||t==='greet_mc') return '#185FA5';
+  if(t==='learn_turn' ||t==='turn_mc')  return '#1D9E75';
+  if(t==='learn_cue'  ||t==='cue_mc')   return '#7F77DD';
+  if(t==='learn_scene'||t==='scene_mc') return '#D4537E';
+  if(t==='learn_rules'||t==='bubble_complete') return '#993556';
+  if(t==='finish') return '#993556';
+  return '#D4537E';
+}
+
+function say(t){ if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(t);u.rate=.84;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);} }
+function abtn(text,label){ label=label||'Hear it'; return '<button class="audio-btn" onclick="say(\''+text.replace(/'/g,"\\'")+'\')"><svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#993556" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'+label+'</button>'; }
+
+function updateChrome(){
+  document.getElementById('ctr').textContent = 'Card '+(cur+1)+' of '+CARDS.length;
+  var pct = cur===0?0:cur>=CARDS.length-1?100:Math.round((cur/(CARDS.length-2))*100);
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('chip').textContent = correct+' / '+qCards.length;
+  document.getElementById('stripe').style.background = stripeColor(CARDS[cur].type);
+  document.getElementById('btn-back').disabled = cur===0;
+  var nxt = document.getElementById('btn-next');
+  nxt.disabled = quizTypes.indexOf(CARDS[cur].type)>=0 && ans[cur]===undefined;
+  nxt.textContent = cur===0?'Start deck':cur>=CARDS.length-2?'See results':'Next card';
+  nxt.style.background = stripeColor(CARDS[cur].type);
+}
+
+function render(){
+  updateChrome();
+  var c = CARDS[cur];
+  var b = document.getElementById('body');
+
+  if(c.type==='intro'){
+    b.innerHTML='<div style="font-size:60px;margin-bottom:10px">🤝</div>'
+      +'<div class="type-badge b-learn">Social Skills · Level 1</div>'
+      +'<div class="card-instruction">Being a Good Friend</div>'
+      +'<div class="card-hint" style="max-width:290px;line-height:1.6">Learn how to greet people, take turns talking, read social cues, and handle tricky situations.</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#FBEAF0;color:#72243E;font-weight:600">17 cards</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#E1F5EE;color:#085041;font-weight:600">Turn-taking</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EEEDFE;color:#3C3489;font-weight:600">Social cues</span>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn_greet'){
+    b.innerHTML='<div class="type-badge b-greet">Greetings</div>'
+      +abtn('Greetings are how we say hello and goodbye. Using a greeting shows people we are friendly and kind.','Hear about greetings')
+      +'<div class="avatar-row">'
+      +'<div class="avatar-wrap">'+avatarSVG('pink','wave',72)+'<div class="avatar-name">Maya</div></div>'
+      +'<div class="avatar-wrap">'+avatarSVG('blue','happy',72)+'<div class="avatar-name">Sam</div></div>'
+      +'</div>'
+      +'<div class="rules-list">'
+      +'<div class="rule-item" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C"><span class="rule-icon">👋</span><span>Say "Hello", "Hi" or "Good morning" when you see someone.</span></div>'
+      +'<div class="rule-item" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041"><span class="rule-icon">👁️</span><span>Look toward the person when you greet them.</span></div>'
+      +'<div class="rule-item" style="background:#FBEAF0;border-color:#F4C0D1;color:#72243E"><span class="rule-icon">👋</span><span>Say "Goodbye", "See you later" or "Bye" when leaving.</span></div>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='greet_mc'){
+    var g = GREETINGS[c.gi];
+    var prev = ans[cur];
+    var btns = g.choices.map(function(ch,i){
+      var cl = prev!==undefined ? (i===g.correct?'correct':(i===prev?'wrong':'')) : '';
+      return '<button class="bubble-choice '+cl+'" onclick="pickIdx('+i+','+g.correct+')" '+(prev!==undefined?'disabled':'')+'>'+ch+'</button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===g.correct ? '<div class="feedback good">Great choice! That is a friendly greeting!</div>' : '<div class="feedback bad">The best answer is: '+g.choices[g.correct]+'</div>') : '';
+    b.innerHTML='<div class="type-badge b-greet">Choose the greeting</div>'
+      +abtn(g.situation,'Hear the situation')
+      +'<div class="cue-scene" style="margin-bottom:14px"><div class="cue-label">The situation</div><div class="cue-scene-text">'+g.situation+'</div></div>'
+      +'<div class="card-hint">Tap the best thing to say.</div>'
+      +'<div class="bubble-choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='learn_turn'){
+    b.innerHTML='<div class="type-badge b-turn">Turn-taking</div>'
+      +abtn('Taking turns in a conversation means one person talks, then the other person talks. It is like a ball — you throw it, then you catch it.','Hear about turn-taking')
+      +'<div class="turn-track">'
+      +'<div class="turn-row"><div class="turn-avatar">'+avatarSVG('pink','talking',52)+'</div><div class="turn-bubble" style="background:#FBEAF0;border-color:#D4537E;color:#72243E">"I love reading books!"</div></div>'
+      +'<div class="turn-row right"><div class="turn-avatar">'+avatarSVG('blue','happy',52)+'</div><div class="turn-bubble" style="background:#E6F1FB;border-color:#378ADD;color:#0C447C">"Me too! What is your favourite?"</div></div>'
+      +'<div class="turn-row"><div class="turn-avatar">'+avatarSVG('pink','talking',52)+'</div><div class="turn-bubble" style="background:#FBEAF0;border-color:#D4537E;color:#72243E">"I love Harry Potter!"</div></div>'
+      +'</div>'
+      +'<div style="font-size:13px;color:#888;max-width:290px;line-height:1.5">Each person gets a turn. Wait and listen before you speak.</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='turn_mc'){
+    var t = TURN_CARDS[c.ti];
+    var prev = ans[cur];
+    var btns = t.choices.map(function(ch,i){
+      var cl = prev!==undefined ? (i===t.correct?'correct':(i===prev?'wrong':'')) : '';
+      return '<button class="bubble-choice '+cl+'" onclick="pickIdx('+i+','+t.correct+')" '+(prev!==undefined?'disabled':'')+'>'+ch+'</button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===t.correct ? '<div class="feedback good">Yes! That is great turn-taking!</div>' : '<div class="feedback bad">The best answer is: '+t.choices[t.correct]+'</div>') : '';
+    b.innerHTML='<div class="type-badge b-turn">Turn-taking</div>'
+      +abtn(t.context,'Hear the situation')
+      +'<div style="display:flex;align-items:flex-end;gap:12px;justify-content:center;margin:10px 0 6px">'
+      +'<div class="avatar-wrap">'+avatarSVG(t.color,'talking',60)+'<div class="avatar-name">'+t.speaker+'</div></div>'
+      +'<div class="bubble bubble-pink" style="margin-bottom:18px">'+t.context+'</div>'
+      +'</div>'
+      +'<div class="card-hint">What should you do?</div>'
+      +'<div class="bubble-choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='learn_cue'){
+    b.innerHTML='<div class="type-badge b-cue">Reading social cues</div>'
+      +abtn('Social cues are signals people send with their face, body, and voice. We can look for these clues to understand how someone is feeling.','Hear about social cues')
+      +'<div class="rules-list">'
+      +'<div class="rule-item" style="background:#EEEDFE;border-color:#AFA9EC;color:#3C3489"><span class="rule-icon">😊</span><span>A smile and relaxed body often means someone is happy or friendly.</span></div>'
+      +'<div class="rule-item" style="background:#FCEBEB;border-color:#F09595;color:#A32D2D"><span class="rule-icon">😟</span><span>Looking down, crossed arms, or tears can mean someone is sad or upset.</span></div>'
+      +'<div class="rule-item" style="background:#FAEEDA;border-color:#FAC775;color:#854F0B"><span class="rule-icon">👀</span><span>Watch both the face AND the body — they work together.</span></div>'
+      +'<div class="rule-item" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041"><span class="rule-icon">🤔</span><span>If you are not sure, it is okay to ask: "Are you okay?"</span></div>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='cue_mc'){
+    var cu = CUE_CARDS[c.ci];
+    var prev = ans[cur];
+    var btns = cu.choices.map(function(ch,i){
+      var cl = prev!==undefined ? (i===cu.correct?'correct':(i===prev?'wrong':'')) : '';
+      return '<button class="choice '+cl+'" onclick="pickIdx('+i+','+cu.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-icon">'+ch.icon+'</span><span>'+ch.text+'</span></button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===cu.correct ? '<div class="feedback good">Great reading of those cues!</div>' : '<div class="feedback bad">'+cu.choices[cu.correct].text+'</div>') : '';
+    b.innerHTML='<div class="type-badge b-cue">Read the cue</div>'
+      +abtn(cu.desc+' '+cu.question,'Hear the situation')
+      +'<div class="cue-scene"><div class="cue-label">What do you notice?</div><div class="cue-scene-text">'+cu.desc+'</div></div>'
+      +'<div class="card-instruction" style="font-size:16px;margin-bottom:4px">'+cu.question+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='learn_scene'){
+    b.innerHTML='<div class="type-badge b-scene">Tricky situations</div>'
+      +abtn('Sometimes situations at school or with friends can be tricky. We can think about what to do before we react.','Hear about tricky situations')
+      +'<div style="font-size:48px;margin:8px 0 10px">🤔</div>'
+      +'<div class="card-instruction" style="font-size:16px;margin-bottom:10px">Stop. Think. Then act.</div>'
+      +'<div class="rules-list">'
+      +'<div class="rule-item" style="background:#FBEAF0;border-color:#F4C0D1;color:#72243E"><span class="rule-icon">✋</span><span>Stop and take a breath before you do anything.</span></div>'
+      +'<div class="rule-item" style="background:#FAEEDA;border-color:#FAC775;color:#854F0B"><span class="rule-icon">💭</span><span>Think: "What is the kind and safe thing to do?"</span></div>'
+      +'<div class="rule-item" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041"><span class="rule-icon">👍</span><span>Ask nicely, say sorry, or ask an adult for help.</span></div>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='scene_mc'){
+    var sc = SCENE_CARDS[c.si];
+    var prev = ans[cur];
+    var btns = sc.choices.map(function(ch,i){
+      var cl = prev!==undefined ? (i===sc.correct?'correct':(i===prev?'wrong':'')) : '';
+      return '<button class="choice '+cl+'" onclick="pickIdx('+i+','+sc.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-icon">'+ch.icon+'</span><span>'+ch.text+'</span></button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===sc.correct ? '<div class="feedback good">Well done! That was the kind and friendly choice!</div>' : '<div class="feedback bad">The best choice is: '+sc.choices[sc.correct].text+'</div>') : '';
+    b.innerHTML='<div class="type-badge b-scene">What should you do?</div>'
+      +abtn(sc.scene,'Hear the situation')
+      +'<div class="cue-scene" style="margin-bottom:12px"><div class="cue-label">What happened</div><div class="cue-scene-text">'+sc.scene+'</div></div>'
+      +'<div class="card-instruction" style="font-size:16px;margin-bottom:4px">'+sc.question+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='learn_rules'){
+    b.innerHTML='<div class="type-badge b-scene">Conversation rules</div>'
+      +abtn('Here are four important conversation rules to remember when talking with a friend.','Hear the rules')
+      +'<div class="rules-list">'
+      +'<div class="rule-item" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C"><span class="rule-icon">👂</span><span>Listen when the other person is talking — do not interrupt.</span></div>'
+      +'<div class="rule-item" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041"><span class="rule-icon">🎯</span><span>Stay on the same topic — do not change the subject suddenly.</span></div>'
+      +'<div class="rule-item" style="background:#FBEAF0;border-color:#F4C0D1;color:#72243E"><span class="rule-icon">🙂</span><span>Use a friendly, calm voice — not too loud or too quiet.</span></div>'
+      +'<div class="rule-item" style="background:#FAEEDA;border-color:#FAC775;color:#854F0B"><span class="rule-icon">❓</span><span>Ask the other person a question to show you are interested.</span></div>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='bubble_complete'){
+    var prev = ans[cur];
+    var opts = [
+      '"That sounds fun! Can I play too?"',
+      '"No. I don\'t care about that."',
+      '"Go away — I\'m busy."',
+      '"Whatever."'
+    ];
+    var correctIdx = 0;
+    var btns = opts.map(function(o,i){
+      var cl = prev!==undefined ? (i===correctIdx?'correct':(i===prev?'wrong':'')) : '';
+      return '<button class="bubble-choice '+cl+'" onclick="pickIdx('+i+','+correctIdx+')" '+(prev!==undefined?'disabled':'')+'>'+(i===0?'🟢 ':i===1?'🔴 ':i===2?'🔴 ':'🔴 ')+o+'</button>';
+    }).join('');
+    var fb = prev!==undefined ? (prev===correctIdx ? '<div class="feedback good">That is a warm, friendly response!</div>' : '<div class="feedback bad">The friendly response is: '+opts[0]+'</div>') : '';
+    b.innerHTML='<div class="type-badge b-scene">Complete the conversation</div>'
+      +abtn('Your friend says: I am building a really cool castle out of blocks!','Hear the conversation')
+      +'<div class="turn-track">'
+      +'<div class="turn-row"><div class="turn-avatar">'+avatarSVG('teal','talking',52)+'</div>'
+      +'<div class="turn-bubble" style="background:#E1F5EE;border-color:#1D9E75;color:#0F6E56">"I am building a really cool castle out of blocks!"</div></div>'
+      +'<div class="turn-row right"><div class="turn-avatar">'+avatarSVG('pink','neutral',52)+'</div>'
+      +'<div class="turn-blank" style="border-color:#D4537E;color:#D4537E">Your turn... 🎤</div></div>'
+      +'</div>'
+      +'<div class="card-hint">Tap the best response.</div>'
+      +'<div class="bubble-choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='finish'){
+    var total = qCards.length;
+    var pct = Math.round((correct/total)*100);
+    var msg = pct===100?'Social superstar!':pct>=60?'Great social skills!':'Keep practising!';
+    b.innerHTML='<div style="font-size:60px;margin-bottom:8px">🤝</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Deck complete!</div>'
+      +'<div style="font-size:15px;color:#666;margin-bottom:16px">'+msg+'</div>'
+      +'<div class="score-row">'
+      +'<div class="sc" style="background:#FBEAF0;border-color:#F4C0D1"><div class="sc-n" style="color:#993556">'+correct+'</div><div class="sc-l">Correct</div></div>'
+      +'<div class="sc" style="background:#E6F1FB;border-color:#B5D4F4"><div class="sc-n" style="color:#185FA5">'+total+'</div><div class="sc-l">Questions</div></div>'
+      +'<div class="sc" style="background:#E1F5EE;border-color:#9FE1CB"><div class="sc-n" style="color:#0F6E56">'+pct+'%</div><div class="sc-l">Score</div></div>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #D4537E;background:#FBEAF0">👋</div><div class="bdg-lbl">Greeting champion</div></div>'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #1D9E75;background:#E1F5EE">🔄</div><div class="bdg-lbl">Turn-taker</div></div>'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #7F77DD;background:#EEEDFE">👁️</div><div class="bdg-lbl">Cue reader</div></div>'
+      +(pct===100?'<div class="bdg"><div class="bdg-ring" style="border:3px solid #f0a500;background:#FAEEDA">🏆</div><div class="bdg-lbl">Perfect deck!</div></div>':'')
+      +'</div>'
+      +'<button class="replay-btn" onclick="restart()">Play again</button>';
+    document.getElementById('btn-next').disabled=true;
+    document.getElementById('btn-next').textContent='Done';
+  }
+}
+
+function pickIdx(chosen, correctIdx){
+  if(ans[cur]!==undefined) return;
+  ans[cur] = chosen;
+  if(chosen===correctIdx) correct++;
+  updateChrome(); render();
+}
+function goNext(){ if(cur<CARDS.length-1){cur++;render();} }
+function goBack(){ if(cur>0){cur--;render();} }
+function restart(){ cur=0;correct=0;ans={};render(); }
+render();
+</script>
+</body>
+</html>

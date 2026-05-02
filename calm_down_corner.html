@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Calm Down Corner — My Learning World</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #eef4f8;
+  --card:    #ffffff;
+  --ink:     #1d2b3a;
+  --muted:   #6b7f90;
+  --border:  #dce8f0;
+  --blue:    #2a6fa8;
+  --blue-l:  #e8f3fc;
+  --teal:    #1a8a68;
+  --teal-l:  #e4f7f1;
+  --amber:   #9c6010;
+  --amber-l: #fef5e4;
+  --rose:    #a03060;
+  --rose-l:  #fdf0f5;
+  --purple:  #5c48c0;
+  --purple-l:#f0eeff;
+  --green:   #2e7d32;
+  --green-l: #e8f5e9;
+  --r:       18px;
+  --shadow:  0 4px 24px rgba(0,0,0,.09);
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Screens ── */
+.screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 24px 20px 36px; }
+.screen.active { display: flex; }
+
+/* ── Entrance screen ── */
+.entrance { background: linear-gradient(160deg, #e8f3fc 0%, #eef7f4 50%, #f0eeff 100%); }
+.entrance-inner { max-width: 440px; width: 100%; text-align: center; }
+.entrance-sky { font-size: 80px; margin-bottom: 10px; animation: float 4s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.entrance-title { font-size: 32px; font-weight: 900; color: var(--blue); margin-bottom: 8px; line-height: 1.15; }
+.entrance-sub   { font-size: 17px; font-weight: 600; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+.entrance-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.ent-card {
+  background: var(--card); border-radius: var(--r); padding: 18px 14px;
+  border: 2px solid var(--border); cursor: pointer;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .18s, box-shadow .18s;
+  text-align: center;
+}
+.ent-card:hover  { transform: translateY(-4px) scale(1.03); border-color: var(--blue); box-shadow: var(--shadow); }
+.ent-card:active { transform: scale(.97); }
+.ent-icon  { font-size: 38px; margin-bottom: 8px; display: block; }
+.ent-label { font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 3px; }
+.ent-desc  { font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+.ent-footer { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* ── Hub nav ── */
+.hub-header {
+  width: 100%; max-width: 520px; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px; flex-shrink: 0;
+}
+.hub-back {
+  display: flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 99px;
+  border: 1.5px solid var(--border); background: var(--card); cursor: pointer;
+  font-size: 13px; font-weight: 700; color: var(--muted); transition: background .15s;
+}
+.hub-back:hover { background: var(--border); }
+.hub-step { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+/* ── Check-in screen ── */
+.checkin-screen { background: linear-gradient(160deg, #fef5e4 0%, #f0eeff 100%); }
+.screen-title { font-size: 24px; font-weight: 900; color: var(--ink); margin-bottom: 6px; text-align: center; }
+.screen-sub   { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 24px; text-align: center; }
+.feelings-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; width: 100%; max-width: 520px; margin-bottom: 24px; }
+.feeling-btn {
+  border-radius: 16px; border: 2.5px solid transparent; padding: 14px 8px;
+  text-align: center; cursor: pointer; transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .18s;
+  background: var(--card);
+}
+.feeling-btn:hover  { transform: scale(1.08); }
+.feeling-btn:active { transform: scale(.95); }
+.feeling-btn.selected { border-width: 3px; }
+.fb-emoji { font-size: 36px; margin-bottom: 6px; display: block; }
+.fb-label { font-size: 12px; font-weight: 800; line-height: 1.3; }
+.fb-zone  { font-size: 10px; font-weight: 700; margin-top: 3px; opacity: .75; }
+.checkin-next {
+  padding: 14px 40px; border-radius: 99px; border: none; font-size: 17px; font-weight: 900;
+  color: #fff; cursor: pointer; font-family: 'Nunito', sans-serif;
+  transition: opacity .15s, transform .12s; background: var(--blue);
+  opacity: .4; pointer-events: none;
+}
+.checkin-next.ready { opacity: 1; pointer-events: all; }
+.checkin-next:hover  { opacity: .88; }
+.checkin-next:active { transform: scale(.97); }
+
+/* ── Breathing screen ── */
+.breathing-screen { background: linear-gradient(160deg, #e4f7f1 0%, #e8f3fc 100%); }
+.breath-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 420px; }
+.breath-instruction { font-size: 22px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 6px; min-height: 32px; }
+.breath-count       { font-size: 42px; font-weight: 900; color: var(--teal); margin-bottom: 24px; min-height: 52px; }
+.breath-circle-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 28px; }
+.breath-circle {
+  width: 220px; height: 220px; border-radius: 50%;
+  background: var(--teal-l); border: 4px solid var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 64px;
+  transition: transform 3s ease-in-out, background 3s ease-in-out;
+}
+.breath-circle.inhale { transform: scale(1.35); background: #c8f0e4; }
+.breath-circle.hold   { transform: scale(1.35); background: #a8e4d4; }
+.breath-circle.exhale { transform: scale(1);    background: var(--teal-l); }
+.breath-ring {
+  position: absolute; inset: -12px; border-radius: 50%;
+  border: 3px solid; border-color: transparent var(--teal) transparent transparent;
+  opacity: .3; transition: transform 3s linear;
+}
+.breath-pattern-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+.pattern-btn {
+  padding: 8px 16px; border-radius: 99px; border: 2px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 700; color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.pattern-btn:hover  { border-color: var(--teal); color: var(--teal); background: var(--teal-l); }
+.pattern-btn.active { border-color: var(--teal); color: var(--teal); background: var(--teal-l); }
+.breath-progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+.bp-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: background .3s; }
+.bp-dot.done { background: var(--teal); }
+.bp-dot.active { background: var(--teal); opacity: .5; animation: pulse .8s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+.breath-btns { display: flex; gap: 10px; }
+.breath-action {
+  padding: 13px 28px; border-radius: 99px; border: none; font-size: 15px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; cursor: pointer; transition: opacity .15s, transform .12s;
+}
+.breath-action:active { transform: scale(.97); }
+.breath-start { background: var(--teal); color: #fff; }
+.breath-skip  { background: var(--card); color: var(--muted); border: 1.5px solid var(--border); }
+.breath-done-msg { font-size: 18px; font-weight: 900; color: var(--teal); text-align: center; padding: 12px 0; }
+
+/* ── Strategy screen ── */
+.strategy-screen { background: linear-gradient(160deg, #f0eeff 0%, #fdf0f5 100%); }
+.strategy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; width: 100%; max-width: 520px; margin-bottom: 20px; }
+.strat-btn {
+  background: var(--card); border-radius: 16px; border: 2.5px solid var(--border);
+  padding: 16px 12px; text-align: center; cursor: pointer;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .15s, background .15s;
+}
+.strat-btn:hover  { transform: translateY(-4px) scale(1.04); border-color: var(--purple); }
+.strat-btn:active { transform: scale(.95); }
+.strat-btn.active { border-color: var(--purple); background: var(--purple-l); }
+.strat-icon  { font-size: 36px; margin-bottom: 8px; display: block; }
+.strat-label { font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+.strat-desc  { font-size: 11px; font-weight: 600; color: var(--muted); line-height: 1.4; }
+.strat-detail {
+  width: 100%; max-width: 520px; background: var(--card); border-radius: var(--r);
+  padding: 18px 20px; border: 2px solid var(--purple-l);
+  font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.7;
+  margin-bottom: 20px; text-align: center; min-height: 60px;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.strat-cta {
+  padding: 13px 36px; border-radius: 99px; border: none; font-size: 16px; font-weight: 900;
+  background: var(--purple); color: #fff; font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: opacity .15s, transform .12s;
+}
+.strat-cta:hover  { opacity: .88; }
+.strat-cta:active { transform: scale(.97); }
+
+/* ── Affirmation screen ── */
+.affirm-screen { background: linear-gradient(160deg, #e8f5e9 0%, #e8f3fc 100%); }
+.affirm-inner { max-width: 440px; width: 100%; text-align: center; }
+.affirm-star { font-size: 80px; animation: spinBounce .6s ease both; margin-bottom: 16px; display: block; }
+@keyframes spinBounce { 0%{transform:scale(0) rotate(-30deg)} 70%{transform:scale(1.15) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
+.affirm-title { font-size: 28px; font-weight: 900; color: var(--green); margin-bottom: 10px; }
+.affirm-body  { font-size: 17px; font-weight: 600; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+.affirm-name  { font-weight: 900; color: var(--ink); }
+.affirm-zone  {
+  display: inline-flex; align-items: center; gap: 10px; padding: 10px 22px;
+  border-radius: 99px; font-size: 15px; font-weight: 800; margin-bottom: 28px;
+}
+.affirm-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.affirm-btn {
+  padding: 13px 26px; border-radius: 99px; font-size: 15px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; cursor: pointer; border: none;
+  transition: opacity .15s, transform .12s;
+}
+.affirm-btn:active { transform: scale(.97); }
+.affirm-btn:hover  { opacity: .88; }
+.affirm-primary   { background: var(--green); color: #fff; }
+.affirm-secondary { background: var(--card); color: var(--muted); border: 1.5px solid var(--border); }
+
+/* ── Quick breathe (standalone) ── */
+.quick-pane { max-width: 420px; width: 100%; }
+
+/* ── Responsive ── */
+@media(max-width:440px){
+  .feelings-grid { grid-template-columns: repeat(2,1fr); }
+  .entrance-title { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ ENTRANCE ══════════════ -->
+<div class="screen entrance active" id="screen-entrance">
+  <div class="entrance-inner">
+    <div class="entrance-sky">🌤️</div>
+    <div class="entrance-title">Calm Down Corner</div>
+    <div class="entrance-sub">This is your safe, quiet space.<br>Take your time. No rush.</div>
+    <div class="entrance-cards">
+      <div class="ent-card" onclick="goCheckin()">
+        <span class="ent-icon">💛</span>
+        <div class="ent-label">How am I feeling?</div>
+        <div class="ent-desc">Name your feeling and find your zone</div>
+      </div>
+      <div class="ent-card" onclick="goBreath()">
+        <span class="ent-icon">🌬️</span>
+        <div class="ent-label">Breathing exercise</div>
+        <div class="ent-desc">Slow breathing to calm down</div>
+      </div>
+      <div class="ent-card" onclick="goStrategy()">
+        <span class="ent-icon">🧰</span>
+        <div class="ent-label">Calm-down toolbox</div>
+        <div class="ent-desc">Choose a strategy to feel better</div>
+      </div>
+      <div class="ent-card" onclick="goAffirm(null)">
+        <span class="ent-icon">⭐</span>
+        <div class="ent-label">I feel better now</div>
+        <div class="ent-desc">Celebrate and head back to learning</div>
+      </div>
+    </div>
+    <div class="ent-footer">Tap any card to get started.</div>
+  </div>
+</div>
+
+<!-- ══════════════ CHECK-IN ══════════════ -->
+<div class="screen checkin-screen" id="screen-checkin">
+  <div class="hub-header" style="max-width:520px;width:100%">
+    <div class="hub-back" onclick="goScreen('entrance')">← Back</div>
+    <div class="hub-step">Step 1 of 3 · How am I feeling?</div>
+  </div>
+  <div class="screen-title">How are you feeling right now?</div>
+  <div class="screen-sub">Tap the face that matches your feeling.</div>
+  <div class="feelings-grid" id="feelings-grid"></div>
+  <div id="checkin-zone-msg" style="font-size:14px;font-weight:700;margin-bottom:20px;min-height:22px;text-align:center"></div>
+  <button class="checkin-next" id="checkin-next" onclick="checkinNext()">That's how I feel →</button>
+</div>
+
+<!-- ══════════════ BREATHING ══════════════ -->
+<div class="screen breathing-screen" id="screen-breath">
+  <div class="hub-header" style="max-width:420px;width:100%">
+    <div class="hub-back" id="breath-back" onclick="goScreen('entrance')">← Back</div>
+    <div class="hub-step" id="breath-step">Breathing exercise</div>
+  </div>
+  <div class="breath-wrap">
+    <div class="breath-instruction" id="breath-instruction">Choose a breathing pattern</div>
+    <div class="breath-count" id="breath-count"></div>
+    <div class="breath-circle-wrap">
+      <div class="breath-circle" id="breath-circle">🌬️</div>
+    </div>
+    <div class="breath-pattern-row">
+      <button class="pattern-btn active" data-pat="box" onclick="setPattern(this)">Box breathing (4-4-4-4)</button>
+      <button class="pattern-btn" data-pat="478" onclick="setPattern(this)">4-7-8 breathing</button>
+      <button class="pattern-btn" data-pat="belly" onclick="setPattern(this)">Belly breathing (3-3-3)</button>
+    </div>
+    <div class="breath-progress" id="breath-progress"></div>
+    <div class="breath-btns">
+      <button class="breath-action breath-start" id="breath-start-btn" onclick="toggleBreath()">Start breathing</button>
+      <button class="breath-action breath-skip"  id="breath-skip-btn"  onclick="skipBreath()">Skip →</button>
+    </div>
+    <div class="breath-done-msg" id="breath-done-msg" style="display:none">🌿 Well done! That was amazing.</div>
+  </div>
+</div>
+
+<!-- ══════════════ STRATEGIES ══════════════ -->
+<div class="screen strategy-screen" id="screen-strategy">
+  <div class="hub-header" style="max-width:520px;width:100%">
+    <div class="hub-back" id="strat-back" onclick="goScreen('entrance')">← Back</div>
+    <div class="hub-step" id="strat-step">Calm-down toolbox</div>
+  </div>
+  <div class="screen-title">Choose a calm-down strategy</div>
+  <div class="screen-sub">Tap one to find out what to do.</div>
+  <div class="strategy-grid" id="strategy-grid"></div>
+  <div class="strat-detail" id="strat-detail" style="display:none"></div>
+  <button class="strat-cta" id="strat-cta" onclick="strategyNext()" style="display:none">I tried it — I feel a bit better ✓</button>
+</div>
+
+<!-- ══════════════ AFFIRMATION ══════════════ -->
+<div class="screen affirm-screen" id="screen-affirm">
+  <div class="affirm-inner">
+    <span class="affirm-star" id="affirm-star">⭐</span>
+    <div class="affirm-title" id="affirm-title">You did it!</div>
+    <div class="affirm-body" id="affirm-body">You took care of yourself today. That is a really big deal.</div>
+    <div class="affirm-zone" id="affirm-zone" style="background:#e8f5e9;color:#2e7d32">🟢 Feeling calmer now</div>
+    <div class="affirm-btns">
+      <button class="affirm-btn affirm-secondary" onclick="goScreen('entrance')">Try something else</button>
+      <button class="affirm-btn affirm-primary"   onclick="goScreen('entrance')">Back to learning 🚀</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ══════════════════════ DATA ══════════════════════ */
+var FEELINGS = [
+  { emoji:'😊', label:'Happy',      zone:'green',  zoneLabel:'Green zone',  zColor:'#2e7d32', zBg:'#e8f5e9', message:'You are in the green zone! Feeling happy is great.' },
+  { emoji:'😌', label:'Calm',       zone:'green',  zoneLabel:'Green zone',  zColor:'#2e7d32', zBg:'#e8f5e9', message:'You are in the green zone. Calm and ready — brilliant!' },
+  { emoji:'😢', label:'Sad',        zone:'blue',   zoneLabel:'Blue zone',   zColor:'#1462a8', zBg:'#e8f3fc', message:'You are in the blue zone. It is okay to feel sad. Let\'s help you feel better.' },
+  { emoji:'😴', label:'Tired',      zone:'blue',   zoneLabel:'Blue zone',   zColor:'#1462a8', zBg:'#e8f3fc', message:'You are in the blue zone. Feeling tired is okay. A breathing break might help.' },
+  { emoji:'😟', label:'Worried',    zone:'yellow', zoneLabel:'Yellow zone', zColor:'#9c6010', zBg:'#fef5e4', message:'You are in the yellow zone. Feeling worried is normal. Let\'s try to calm those feelings.' },
+  { emoji:'🤩', label:'Excited',    zone:'yellow', zoneLabel:'Yellow zone', zColor:'#9c6010', zBg:'#fef5e4', message:'You are in the yellow zone — excited! It can be hard to focus. Try a breathing exercise.' },
+  { emoji:'😤', label:'Frustrated', zone:'yellow', zoneLabel:'Yellow zone', zColor:'#9c6010', zBg:'#fef5e4', message:'You are in the yellow zone. Feeling frustrated is hard. Let\'s find a strategy together.' },
+  { emoji:'😠', label:'Angry',      zone:'red',    zoneLabel:'Red zone',    zColor:'#a32d2d', zBg:'#ffefef', message:'You are in the red zone. Big feelings can feel huge. Let\'s take it one step at a time.' },
+  { emoji:'😭', label:'Upset',      zone:'red',    zoneLabel:'Red zone',    zColor:'#a32d2d', zBg:'#ffefef', message:'You are in the red zone. Feeling very upset is really hard. You are not alone.' },
+  { emoji:'😶', label:'Blank',      zone:'blue',   zoneLabel:'Blue zone',   zColor:'#1462a8', zBg:'#e8f3fc', message:'Not sure how you feel? That is okay too. Try a breathing exercise.' },
+  { emoji:'😵', label:'Overwhelmed',zone:'red',    zoneLabel:'Red zone',    zColor:'#a32d2d', zBg:'#ffefef', message:'Feeling overwhelmed is very hard. Let\'s slow everything right down.' },
+  { emoji:'🫤', label:'Confused',   zone:'yellow', zoneLabel:'Yellow zone', zColor:'#9c6010', zBg:'#fef5e4', message:'Feeling confused can be unsettling. A calm-down strategy can help clear your head.' }
+];
+
+var STRATEGIES = [
+  { icon:'🌬️', label:'Deep breaths',       desc:'Breathe in for 4, hold for 4, breathe out for 4.', detail:'Put one hand on your tummy. Breathe IN slowly for 4 counts — feel your tummy rise. Hold for 4. Breathe OUT slowly for 4 — feel your tummy fall. Do this 3 times.' },
+  { icon:'🤜',  label:'Squeeze it out',     desc:'Squeeze a fidget or your hands together.', detail:'Make both hands into tight fists. Squeeze as hard as you can for 5 seconds. Then slowly open your hands and let the feeling go. Repeat 3 times.' },
+  { icon:'🙆',  label:'Body stretch',       desc:'Stand up and do a big stretch.', detail:'Stand up tall. Reach both arms high above your head. Take a deep breath in. Hold for 3 seconds. Let your arms float back down as you breathe out. Do this slowly 4 times.' },
+  { icon:'🚶',  label:'Walk it out',        desc:'Take 10 slow steps on the spot.', detail:'Stand up. March slowly on the spot — left, right, left, right. Count 10 big steps. With each step, breathe in through your nose and out through your mouth.' },
+  { icon:'💧',  label:'Drink some water',   desc:'Get a cup of water and sip it slowly.', detail:'Get a cup of cool water. Take 5 very slow sips. Focus on how the water feels cool and refreshing. This helps your body and brain calm down.' },
+  { icon:'🎨',  label:'Draw your feelings', desc:'Draw or scribble what you are feeling.', detail:'Get a piece of paper. Draw a picture of how you are feeling — it does not have to be neat. Use any colours you like. Scribbling is allowed! Drawing helps get big feelings out.' },
+  { icon:'🧸',  label:'Hold something soft',desc:'Hold a soft toy, pillow or blanket.', detail:'Find something soft — a toy, a cushion, or a blanket. Hold it tightly and focus on how it feels in your hands. Close your eyes if it helps. Stay like this for one whole minute.' },
+  { icon:'🔢',  label:'Count slowly',       desc:'Count backwards from 10 to 1.', detail:'Close your eyes if you like. Count very slowly backwards: 10 ... 9 ... 8 ... 7 ... 6 ... 5 ... 4 ... 3 ... 2 ... 1. With each number, breathe out a little bit.' },
+  { icon:'👁️',  label:'5-4-3-2-1 grounding',desc:'Look around and name 5 things you can see.', detail:'Look around and name 5 things you can SEE. Then 4 things you can TOUCH. 3 things you can HEAR. 2 things you can SMELL. 1 thing you can TASTE. This brings you back to now.' },
+  { icon:'🎵',  label:'Hum a song',         desc:'Hum your favourite song quietly.', detail:'Close your mouth and hum a song you love — any song at all. Feel the vibration in your lips and chest. Humming actually tells your nervous system to calm down. Hum for one whole minute.' }
+];
+
+var PATTERNS = {
+  box:   { name:'Box breathing',  phases:[ {label:'Breathe in', dur:4}, {label:'Hold',       dur:4}, {label:'Breathe out',dur:4}, {label:'Hold',       dur:4} ], cycles:4 },
+  '478': { name:'4-7-8 breathing',phases:[ {label:'Breathe in', dur:4}, {label:'Hold',       dur:7}, {label:'Breathe out',dur:8} ], cycles:3 },
+  belly: { name:'Belly breathing',phases:[ {label:'Breathe in', dur:3}, {label:'Breathe out',dur:3} ], cycles:5 }
+};
+
+/* ── State ── */
+var _selectedFeeling = null;
+var _checkinFrom = 'entrance';
+var _breathFrom  = 'entrance';
+var _stratFrom   = 'entrance';
+var _breathPat   = 'box';
+var _breathTimer = null;
+var _breathRunning = false;
+var _breathCycle = 0;
+var _selectedStrat = null;
+
+/* ══════════════════════ NAVIGATION ══════════════════════ */
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goCheckin(from){
+  _checkinFrom = from || 'entrance';
+  document.getElementById('checkin-next').classList.remove('ready');
+  _selectedFeeling = null;
+  document.getElementById('checkin-zone-msg').textContent = '';
+  renderFeelings();
+  goScreen('checkin');
+}
+
+function goBreath(from){
+  _breathFrom = from || 'entrance';
+  document.getElementById('breath-back').onclick = function(){ stopBreath(); goScreen(_breathFrom); };
+  resetBreath();
+  goScreen('breath');
+}
+
+function goStrategy(from){
+  _stratFrom = from || 'entrance';
+  document.getElementById('strat-back').onclick = function(){ goScreen(_stratFrom); };
+  _selectedStrat = null;
+  document.getElementById('strat-detail').style.display = 'none';
+  document.getElementById('strat-cta').style.display = 'none';
+  renderStrategies();
+  goScreen('strategy');
+}
+
+function goAffirm(feeling){
+  var star   = document.getElementById('affirm-star');
+  var title  = document.getElementById('affirm-title');
+  var body   = document.getElementById('affirm-body');
+  var zone   = document.getElementById('affirm-zone');
+
+  if(feeling){
+    star.textContent  = feeling.emoji;
+    title.textContent = 'You took good care of yourself!';
+    body.textContent  = 'You noticed how you were feeling and did something about it. That takes real strength and bravery.';
+    zone.textContent  = feeling.zoneLabel+' — '+feeling.label;
+    zone.style.background = feeling.zBg;
+    zone.style.color      = feeling.zColor;
+  } else {
+    star.textContent  = '⭐';
+    title.textContent = 'Well done for taking a break!';
+    body.textContent  = 'Coming to the calm-down corner shows great self-awareness. You should be really proud.';
+    zone.textContent  = '🟢 Feeling calmer now';
+    zone.style.background = '#e8f5e9';
+    zone.style.color      = '#2e7d32';
+  }
+  goScreen('affirm');
+}
+
+/* ══════════════════════ CHECK-IN ══════════════════════ */
+function renderFeelings(){
+  var el = document.getElementById('feelings-grid');
+  el.innerHTML = FEELINGS.map(function(f, i){
+    var zColors = { green:'#e8f5e9', blue:'#e8f3fc', yellow:'#fef5e4', red:'#ffefef' };
+    var bg = zColors[f.zone]||'#f8f8f8';
+    return '<div class="feeling-btn" data-i="'+i+'" onclick="selectFeeling('+i+')" style="border-color:'+bg+'">'
+      +'<span class="fb-emoji">'+f.emoji+'</span>'
+      +'<div class="fb-label" style="color:#1d2b3a">'+f.label+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function selectFeeling(i){
+  _selectedFeeling = FEELINGS[i];
+  document.querySelectorAll('.feeling-btn').forEach(function(b, j){
+    b.classList.toggle('selected', j===i);
+    if(j===i) b.style.borderColor = _selectedFeeling.zColor;
+    else b.style.borderColor = '';
+  });
+  var msg = document.getElementById('checkin-zone-msg');
+  msg.textContent  = _selectedFeeling.message;
+  msg.style.color  = _selectedFeeling.zColor;
+  document.getElementById('checkin-next').classList.add('ready');
+}
+
+function checkinNext(){
+  if(!_selectedFeeling) return;
+  // Route based on zone
+  var z = _selectedFeeling.zone;
+  if(z === 'green'){
+    goAffirm(_selectedFeeling);
+  } else if(z === 'blue'){
+    // Blue: suggest breathing
+    document.getElementById('breath-step').textContent = 'Step 2 · Breathing exercise';
+    document.getElementById('breath-back').onclick = function(){ stopBreath(); goCheckin(); };
+    resetBreath();
+    goScreen('breath');
+  } else {
+    // Yellow/red: breathing first, then strategies
+    document.getElementById('breath-step').textContent = 'Step 2 of 3 · Let\'s slow down first';
+    document.getElementById('breath-back').onclick = function(){ stopBreath(); goCheckin(); };
+    resetBreath();
+    goScreen('breath');
+  }
+}
+
+/* ══════════════════════ BREATHING ══════════════════════ */
+function setPattern(btn){
+  document.querySelectorAll('.pattern-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  _breathPat = btn.dataset.pat;
+  stopBreath();
+  resetBreath();
+}
+
+function resetBreath(){
+  stopBreath();
+  _breathCycle = 0;
+  _breathRunning = false;
+  document.getElementById('breath-circle').className = 'breath-circle';
+  document.getElementById('breath-circle').textContent = '🌬️';
+  document.getElementById('breath-instruction').textContent = 'Ready? Tap Start when you are.';
+  document.getElementById('breath-count').textContent = '';
+  document.getElementById('breath-start-btn').textContent = 'Start breathing';
+  document.getElementById('breath-done-msg').style.display = 'none';
+  renderBreathProgress();
+}
+
+function renderBreathProgress(){
+  var pat = PATTERNS[_breathPat];
+  var el = document.getElementById('breath-progress');
+  el.innerHTML = Array.from({length: pat.cycles}, function(_,i){
+    var cl = i < _breathCycle ? 'done' : (i === _breathCycle && _breathRunning ? 'active' : '');
+    return '<div class="bp-dot '+cl+'"></div>';
+  }).join('');
+}
+
+function toggleBreath(){
+  if(_breathRunning){ stopBreath(); document.getElementById('breath-start-btn').textContent='Resume'; return; }
+  _breathRunning = true;
+  document.getElementById('breath-start-btn').textContent = 'Pause';
+  runBreathCycle();
+}
+
+function stopBreath(){
+  _breathRunning = false;
+  clearTimeout(_breathTimer);
+}
+
+function runBreathCycle(){
+  if(!_breathRunning) return;
+  var pat = PATTERNS[_breathPat];
+  if(_breathCycle >= pat.cycles){
+    // Done
+    _breathRunning = false;
+    document.getElementById('breath-circle').className = 'breath-circle';
+    document.getElementById('breath-circle').textContent = '🌿';
+    document.getElementById('breath-instruction').textContent = 'Amazing work!';
+    document.getElementById('breath-count').textContent = '';
+    document.getElementById('breath-start-btn').textContent = 'Start again';
+    document.getElementById('breath-done-msg').style.display = 'block';
+    renderBreathProgress();
+    // Auto-advance after 2s
+    _breathTimer = setTimeout(function(){
+      if(_selectedFeeling && (_selectedFeeling.zone==='yellow'||_selectedFeeling.zone==='red')){
+        document.getElementById('strat-step').textContent = 'Step 3 of 3 · Choose a strategy';
+        document.getElementById('strat-back').onclick = function(){ goBreath('checkin'); };
+        _selectedStrat = null;
+        document.getElementById('strat-detail').style.display = 'none';
+        document.getElementById('strat-cta').style.display = 'none';
+        renderStrategies();
+        goScreen('strategy');
+      } else {
+        goAffirm(_selectedFeeling);
+      }
+    }, 2500);
+    return;
+  }
+  renderBreathProgress();
+  runPhases(pat.phases, 0, function(){
+    _breathCycle++;
+    renderBreathProgress();
+    _breathTimer = setTimeout(runBreathCycle, 600);
+  });
+}
+
+function runPhases(phases, idx, done){
+  if(!_breathRunning) return;
+  if(idx >= phases.length){ done(); return; }
+  var phase = phases[idx];
+  // Set instruction + circle class
+  var circ = document.getElementById('breath-circle');
+  var instr = document.getElementById('breath-instruction');
+  var count = document.getElementById('breath-count');
+  instr.textContent = phase.label;
+  if(phase.label.indexOf('in')>=0 || phase.label==='Breathe in'){
+    circ.className = 'breath-circle inhale';
+  } else if(phase.label==='Breathe out'){
+    circ.className = 'breath-circle exhale';
+  } else {
+    circ.className = 'breath-circle hold';
+  }
+  // Count down
+  var remaining = phase.dur;
+  count.textContent = remaining;
+  var tick = setInterval(function(){
+    if(!_breathRunning){ clearInterval(tick); return; }
+    remaining--;
+    count.textContent = remaining > 0 ? remaining : '';
+    if(remaining <= 0){
+      clearInterval(tick);
+      _breathTimer = setTimeout(function(){ runPhases(phases, idx+1, done); }, 200);
+    }
+  }, 1000);
+}
+
+function skipBreath(){
+  stopBreath();
+  if(_selectedFeeling && (_selectedFeeling.zone==='yellow'||_selectedFeeling.zone==='red')){
+    document.getElementById('strat-step').textContent = 'Step 3 of 3 · Choose a strategy';
+    document.getElementById('strat-back').onclick = function(){ goBreath('checkin'); };
+    _selectedStrat = null;
+    document.getElementById('strat-detail').style.display = 'none';
+    document.getElementById('strat-cta').style.display = 'none';
+    renderStrategies();
+    goScreen('strategy');
+  } else {
+    goAffirm(_selectedFeeling);
+  }
+}
+
+/* ══════════════════════ STRATEGIES ══════════════════════ */
+function renderStrategies(){
+  var el = document.getElementById('strategy-grid');
+  el.innerHTML = STRATEGIES.map(function(s, i){
+    var active = _selectedStrat === i;
+    return '<div class="strat-btn '+(active?'active':'')+'" onclick="selectStrat('+i+')">'
+      +'<span class="strat-icon">'+s.icon+'</span>'
+      +'<div class="strat-label">'+s.label+'</div>'
+      +'<div class="strat-desc">'+s.desc+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function selectStrat(i){
+  _selectedStrat = i;
+  renderStrategies();
+  var s = STRATEGIES[i];
+  var el = document.getElementById('strat-detail');
+  el.innerHTML = '<strong style="display:block;margin-bottom:8px;font-size:17px">'+s.icon+' '+s.label+'</strong>'+s.detail;
+  el.style.display = 'block';
+  document.getElementById('strat-cta').style.display = 'inline-block';
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function strategyNext(){
+  goAffirm(_selectedFeeling);
+}
+
+/* ══════════════════════ INIT ══════════════════════ */
+renderFeelings();
+renderStrategies();
+</script>
+</body>
+</html>

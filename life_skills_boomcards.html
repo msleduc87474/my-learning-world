@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>My Daily Routines — Life Skills · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a2218;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .chrome { width: 100%; max-width: 580px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+  .deck-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); }
+  .card-ctr   { font-size: 13px; color: rgba(255,255,255,.5); }
+  .score-chip { background: #f0a500; border-radius: 99px; padding: 4px 13px; font-size: 12px; font-weight: 700; color: #fff; }
+  .prog-track { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,.15); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: #78d68e; border-radius: 3px; transition: width .5s ease; }
+
+  .card { width: 100%; max-width: 580px; background: #fff; border-radius: 20px; overflow: hidden; min-height: 460px; display: flex; flex-direction: column; }
+  .stripe { height: 8px; transition: background .4s; }
+  .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 22px 14px; text-align: center; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-top: 1.5px solid #f0f0f0; }
+  .fn-back { padding: 10px 22px; border-radius: 99px; border: 2px solid #ddd; background: transparent; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
+  .fn-back:disabled { opacity: .3; cursor: default; }
+  .fn-back:not(:disabled):hover { background: #f5f5f5; }
+  .fn-next { padding: 10px 28px; border-radius: 99px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; color: #fff; background: #3B6D11; }
+  .fn-next:disabled { opacity: .4; cursor: default; }
+  .fn-next:not(:disabled):hover { filter: brightness(1.14); }
+
+  .type-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  .b-learn  { background: #EAF3DE; color: #27500A; }
+  .b-seq    { background: #E6F1FB; color: #0C447C; }
+  .b-mc     { background: #FAEEDA; color: #633806; }
+  .b-safe   { background: #FCEBEB; color: #791F1F; }
+  .b-match  { background: #EEEDFE; color: #3C3489; }
+  .b-task   { background: #E1F5EE; color: #085041; }
+
+  .audio-btn { display: flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 99px; border: 2px solid #c0dda8; background: #f4fbee; font-size: 13px; font-weight: 600; color: #3B6D11; cursor: pointer; margin-bottom: 14px; }
+  .audio-btn:hover { background: #c0dda8; }
+  .spk { width: 18px; height: 18px; }
+
+  .card-instruction { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.3; }
+  .card-hint        { font-size: 13px; color: #888; margin-bottom: 16px; }
+
+  /* Step sequence */
+  .steps-list { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+  .step-item  { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; border: 2px solid; }
+  .step-num   { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+  .step-icon  { font-size: 22px; flex-shrink: 0; }
+  .step-text  { font-size: 13px; font-weight: 600; text-align: left; line-height: 1.4; flex: 1; }
+
+  /* Sequence ordering (drag-like tap-to-order) */
+  .seq-items  { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+  .seq-item   {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-radius: 12px; border: 3px solid #dde4f0; background: #f8faff;
+    cursor: pointer; transition: border-color .15s, background .15s;
+    user-select: none;
+  }
+  .seq-item:hover  { border-color: #3B6D11; background: #f0fae8; }
+  .seq-item.picked { border-color: #3B6D11; background: #d8f0c0; }
+  .seq-item.placed { border-color: #1D9E75; background: #E1F5EE; cursor: default; }
+  .seq-item.wrong  { border-color: #E24B4A; background: #FFEEEE; animation: shake .3s ease; }
+  .seq-pos    { width: 26px; height: 26px; border-radius: 50%; background: #dde4f0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #666; flex-shrink: 0; }
+  .seq-pos.active { background: #3B6D11; color: #fff; }
+  .seq-icon   { font-size: 22px; flex-shrink: 0; }
+  .seq-text   { font-size: 13px; font-weight: 600; text-align: left; flex: 1; color: #1a1a2e; }
+
+  /* Multiple choice */
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    min-width: 110px; padding: 11px 12px; border-radius: 14px;
+    border: 3px solid #dde4f0; background: #fff;
+    font-size: 14px; font-weight: 600; color: #1a1a2e;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    transition: transform .1s, border-color .15s, background .15s; text-align: center; line-height: 1.4;
+  }
+  .choice-icon { font-size: 26px; }
+  .choice:not(:disabled):hover  { transform: scale(1.06); border-color: #3B6D11; }
+  .choice:not(:disabled):active { transform: scale(.93); }
+  .choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Safety mc — yes/no */
+  .yn-row { display: flex; gap: 16px; justify-content: center; }
+  .yn-btn { width: 120px; height: 64px; border-radius: 16px; border: 3px solid #dde4f0; background: #fff; font-size: 19px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform .12s, border-color .18s, background .18s; }
+  .yn-btn:not(:disabled):hover  { transform: scale(1.08); }
+  .yn-btn:not(:disabled):active { transform: scale(.93); }
+  .yn-btn.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .yn-btn.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Scene box */
+  .scene-box { width: 100%; max-width: 360px; border-radius: 16px; padding: 14px 16px; border: 2.5px solid #c0dda8; background: #f4fbee; font-size: 14px; color: #2a3a1a; line-height: 1.6; margin-bottom: 14px; text-align: left; }
+  .scene-label { font-size: 11px; font-weight: 700; color: #3B6D11; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+
+  /* Task analysis checklist */
+  .task-list { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 360px; }
+  .task-item { display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 12px; border: 2px solid #c0dda8; background: #f4fbee; cursor: pointer; transition: background .18s, border-color .18s; }
+  .task-item.checked { background: #E1F5EE; border-color: #1D9E75; }
+  .task-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #97C459; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background .18s; }
+  .task-check.on { background: #1D9E75; border-color: #1D9E75; }
+  .task-check.on::after { content:''; display:block; width:5px; height:10px; border:2.5px solid #fff; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); }
+  .task-icon  { font-size: 20px; flex-shrink: 0; }
+  .task-text  { font-size: 13px; font-weight: 600; color: #2a3a1a; text-align: left; line-height: 1.4; }
+
+  .feedback { font-size: 15px; font-weight: 700; margin-top: 12px; min-height: 22px; }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Finish */
+  .score-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .sc   { border-radius: 14px; padding: 14px 18px; text-align: center; border: 2px solid; min-width: 82px; }
+  .sc-n { font-size: 28px; font-weight: 800; }
+  .sc-l { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+  .badges { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bdg  { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bdg-ring { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .bdg-lbl  { font-size: 10px; color: #888; text-align: center; line-height: 1.3; max-width: 64px; }
+  .replay-btn { padding: 12px 32px; border-radius: 99px; border: 2.5px solid #3B6D11; background: transparent; color: #3B6D11; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .replay-btn:hover { background: #f0fae8; }
+
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  @keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="deck-title">My Daily Routines</span>
+  <span class="card-ctr" id="ctr">Card 1 of 18</span>
+  <span class="score-chip" id="chip">0 / 0</span>
+</div>
+<div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="card">
+  <div class="stripe" id="stripe"></div>
+  <div class="card-body" id="body"></div>
+  <div class="card-footer">
+    <button class="fn-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span style="font-size:12px;color:#bbb" id="nav-hint"></span>
+    <button class="fn-next" id="btn-next" onclick="goNext()">Start deck</button>
+  </div>
+</div>
+
+<script>
+var cur=0, correct=0, ans={};
+
+var MORNING = [
+  { icon:'⏰', text:'Wake up and get out of bed', color:'#3B6D11' },
+  { icon:'🚿', text:'Wash your face and hands', color:'#185FA5' },
+  { icon:'🪥', text:'Brush your teeth', color:'#993556' },
+  { icon:'👕', text:'Get dressed', color:'#854F0B' },
+  { icon:'🍳', text:'Eat breakfast', color:'#0F6E56' },
+  { icon:'🎒', text:'Pack your school bag', color:'#534AB7' }
+];
+
+var HYGIENE = [
+  { icon:'🤲', text:'Wash hands before eating and after the toilet', color:'#185FA5' },
+  { icon:'🪥', text:'Brush teeth morning and night for 2 minutes', color:'#993556' },
+  { icon:'🚿', text:'Shower or bathe every day', color:'#3B6D11' },
+  { icon:'👕', text:'Wear clean clothes each day', color:'#854F0B' },
+  { icon:'💇', text:'Brush or comb your hair', color:'#0F6E56' }
+];
+
+var SEQ_HANDWASH = [
+  { icon:'🚿', text:'Turn on the tap', order:1 },
+  { icon:'🤲', text:'Wet your hands', order:2 },
+  { icon:'🧴', text:'Add soap and rub hands together', order:3 },
+  { icon:'💧', text:'Rinse all the soap off', order:4 },
+  { icon:'🧻', text:'Dry hands with a towel', order:5 }
+];
+
+var SEQ_GETTING_DRESSED = [
+  { icon:'🩲', text:'Put on underwear', order:1 },
+  { icon:'🧦', text:'Put on socks', order:2 },
+  { icon:'👕', text:'Put on your shirt', order:3 },
+  { icon:'👖', text:'Put on your trousers or skirt', order:4 },
+  { icon:'👟', text:'Put on your shoes', order:5 }
+];
+
+var CARDS = [
+  { type:'intro' },
+  // Morning routine learn
+  { type:'learn_steps', title:'Morning routine', steps: MORNING.slice(0,6), color:'#3B6D11', light:'#EAF3DE', border:'#97C459' },
+  // Sequence: handwashing
+  { type:'learn_seq', title:'How to wash your hands', steps: SEQ_HANDWASH, color:'#185FA5', light:'#E6F1FB', border:'#B5D4F4' },
+  { type:'sequence', title:'Put handwashing in the right order', steps: SEQ_HANDWASH.slice().sort(function(){return Math.random()-.5;}), correct: SEQ_HANDWASH },
+  // MC: what to do first in the morning
+  { type:'mc', q:'What is the FIRST thing you do in a morning routine?', icon:'🌅', correct:0, choices:[
+    { icon:'⏰', text:'Wake up and get out of bed' },
+    { icon:'🎒', text:'Pack your school bag' },
+    { icon:'🍳', text:'Eat breakfast' },
+    { icon:'🪥', text:'Brush your teeth' }
+  ]},
+  // Hygiene learn
+  { type:'learn_steps', title:'Personal hygiene habits', steps: HYGIENE, color:'#993556', light:'#FBEAF0', border:'#F4C0D1' },
+  // MC: hygiene
+  { type:'mc', q:'How often should you brush your teeth?', icon:'🦷', correct:1, choices:[
+    { icon:'🗓️', text:'Once a week' },
+    { icon:'☀️🌙', text:'Morning and night every day' },
+    { icon:'🎉', text:'Only on special days' },
+    { icon:'❓', text:'Only when they look dirty' }
+  ]},
+  // Safety: yes or no
+  { type:'safety', q:'A stranger you have never met asks you to follow them somewhere alone. Should you go?', answer: false, hint: 'Always stay with people you know and trust. If unsure, find a safe adult.' },
+  { type:'safety', q:'You need to cross the road. You look both ways and the road is clear. Is it safe to cross?', answer: true, hint: 'Always look both ways before crossing.' },
+  // Sequence: getting dressed
+  { type:'learn_seq', title:'How to get dressed', steps: SEQ_GETTING_DRESSED, color:'#854F0B', light:'#FAEEDA', border:'#FAC775' },
+  { type:'sequence', title:'Put getting dressed in the right order', steps: SEQ_GETTING_DRESSED.slice().sort(function(){return Math.random()-.5;}), correct: SEQ_GETTING_DRESSED },
+  // Task checklist: morning
+  { type:'checklist', title:'My morning routine', task:'Tap each step when you know what it is!', steps: MORNING, color:'#3B6D11', light:'#EAF3DE', border:'#97C459' },
+  // MC: community
+  { type:'mc', q:'Where do you go if you need to buy food?', icon:'🛒', correct:2, choices:[
+    { icon:'🏥', text:'The hospital' },
+    { icon:'🏫', text:'The school' },
+    { icon:'🛒', text:'The supermarket or shop' },
+    { icon:'🚒', text:'The fire station' }
+  ]},
+  // Scene: what to do
+  { type:'scene_mc', scene:'You spill your drink at lunchtime at school. The floor is wet.', q:'What should you do?', correct:1, choices:[
+    { icon:'🚶', text:'Walk away and pretend it didn\'t happen.' },
+    { icon:'🙋', text:'Tell an adult and help clean it up safely.' },
+    { icon:'😢', text:'Cry and do nothing.' },
+    { icon:'😠', text:'Blame someone else.' }
+  ]},
+  // MC: asking for help
+  { type:'mc', q:'When is it okay to ask an adult for help?', icon:'🙋', correct:3, choices:[
+    { icon:'🙅', text:'Never — you must do everything yourself.' },
+    { icon:'😎', text:'Only if you are the best in the class.' },
+    { icon:'😴', text:'Only at bedtime.' },
+    { icon:'✅', text:'Whenever you need it — asking for help is a great skill!' }
+  ]},
+  // Evening routine MC
+  { type:'mc', q:'Which of these is part of a bedtime routine?', icon:'🌙', correct:0, choices:[
+    { icon:'🪥', text:'Brush teeth, put on pyjamas, read a book' },
+    { icon:'📺', text:'Watch TV all night' },
+    { icon:'🍕', text:'Eat a big meal right before sleep' },
+    { icon:'🎮', text:'Play video games until very late' }
+  ]},
+  { type:'finish' }
+];
+
+var quizTypes=['sequence','mc','safety','scene_mc'];
+var qCards=CARDS.filter(function(c){return quizTypes.indexOf(c.type)>=0;});
+
+function stripeColor(t){
+  if(t==='learn_steps'||t==='checklist') return CARDS[cur].color||'#3B6D11';
+  if(t==='learn_seq') return CARDS[cur].color||'#185FA5';
+  if(t==='sequence')  return '#185FA5';
+  if(t==='mc')        return '#3B6D11';
+  if(t==='safety')    return '#A32D2D';
+  if(t==='scene_mc')  return '#854F0B';
+  if(t==='finish')    return '#3B6D11';
+  return '#3B6D11';
+}
+
+function say(t){ if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(t);u.rate=.84;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);} }
+function abtn(text,label){ label=label||'Hear it'; return '<button class="audio-btn" onclick="say(\''+text.replace(/'/g,"\\'")+'\')">'+'<svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'+label+'</button>'; }
+
+// Sequence state
+var _seqPicked=null, _seqPlaced=[], _seqWrong=null;
+
+function updateChrome(){
+  document.getElementById('ctr').textContent='Card '+(cur+1)+' of '+CARDS.length;
+  var pct=cur===0?0:cur>=CARDS.length-1?100:Math.round((cur/(CARDS.length-2))*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('chip').textContent=correct+' / '+qCards.length;
+  var sc=stripeColor(CARDS[cur].type);
+  document.getElementById('stripe').style.background=sc;
+  document.getElementById('btn-back').disabled=cur===0;
+  var nxt=document.getElementById('btn-next');
+  var c=CARDS[cur];
+  nxt.disabled=quizTypes.indexOf(c.type)>=0&&ans[cur]===undefined;
+  nxt.textContent=cur===0?'Start deck':cur>=CARDS.length-2?'See results':'Next card';
+  nxt.style.background=sc==='#A32D2D'?'#A32D2D':sc;
+}
+
+function render(){
+  updateChrome();
+  var c=CARDS[cur];
+  var b=document.getElementById('body');
+
+  if(c.type==='intro'){
+    b.innerHTML='<div style="font-size:60px;margin-bottom:10px">🏠</div>'
+      +'<div class="type-badge b-learn">Life Skills · Level 1</div>'
+      +'<div class="card-instruction">My Daily Routines</div>'
+      +'<div class="card-hint" style="max-width:290px;line-height:1.6">Learn about morning and evening routines, personal hygiene, staying safe, and asking for help.</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EAF3DE;color:#27500A;font-weight:600">18 cards</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#E6F1FB;color:#0C447C;font-weight:600">Step sequences</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#FCEBEB;color:#791F1F;font-weight:600">Safety skills</span>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn_steps'){
+    var html='<div class="type-badge b-learn">Learn</div>'
+      +abtn(c.title,'Hear about '+c.title)
+      +'<div style="font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:12px">'+c.title+'</div>'
+      +'<div class="steps-list">'
+      +c.steps.map(function(s,i){
+        return '<div class="step-item" style="background:'+c.light+';border-color:'+c.border+';animation:popIn .2s ease '+(i*.06)+'s both">'
+          +'<div class="step-num" style="background:'+c.color+';color:#fff">'+(i+1)+'</div>'
+          +'<div class="step-icon">'+s.icon+'</div>'
+          +'<div class="step-text" style="color:'+c.color+'">'+s.text+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+    b.innerHTML=html;
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn_seq'){
+    b.innerHTML='<div class="type-badge b-seq">Step by step</div>'
+      +abtn(c.title,'Hear the steps')
+      +'<div style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:12px">'+c.title+'</div>'
+      +'<div class="steps-list">'
+      +c.steps.map(function(s,i){
+        return '<div class="step-item" style="background:'+c.light+';border-color:'+c.border+';animation:popIn .2s ease '+(i*.07)+'s both">'
+          +'<div class="step-num" style="background:'+c.color+';color:#fff">'+(i+1)+'</div>'
+          +'<div class="step-icon">'+s.icon+'</div>'
+          +'<div class="step-text" style="color:'+c.color+'">'+s.text+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='sequence'){
+    var prev=ans[cur];
+    if(prev){
+      // show completed in order
+      b.innerHTML='<div class="type-badge b-seq">Correct order!</div>'
+        +'<div class="card-instruction" style="font-size:16px;margin-bottom:10px">'+c.title+'</div>'
+        +'<div class="seq-items">'
+        +c.correct.map(function(s,i){
+          return '<div class="seq-item placed">'
+            +'<div class="seq-pos active">'+(i+1)+'</div>'
+            +'<div class="seq-icon">'+s.icon+'</div>'
+            +'<div class="seq-text">'+s.text+'</div>'
+            +'</div>';
+        }).join('')
+        +'</div><div class="feedback good">You got the right order!</div>';
+    } else {
+      renderSeq(c);
+      return;
+    }
+
+  } else if(c.type==='mc'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(ch,i){
+      var cl=prev!==undefined?(i===c.correct?'correct':(i===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" onclick="pickMC('+i+','+c.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-icon">'+ch.icon+'</span><span>'+ch.text+'</span></button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Correct!</div>':'<div class="feedback bad">The answer is: '+c.choices[c.correct].text+'</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">Choose the answer</div>'
+      +abtn(c.q,'Hear question')
+      +'<div style="font-size:48px;margin:6px 0 10px">'+c.icon+'</div>'
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='safety'){
+    var prev=ans[cur];
+    var yesCl=prev!==undefined?(c.answer===true?(prev===true?'correct':''):(prev===true?'wrong':'')):'';
+    var noCl =prev!==undefined?(c.answer===false?(prev===false?'correct':''):(prev===false?'wrong':'')):'';
+    var fb=prev!==undefined?(prev===c.answer?'<div class="feedback good">Correct! Good safety thinking.</div>':'<div class="feedback bad">'+c.hint+'</div>'):'';
+    b.innerHTML='<div class="type-badge b-safe">Safety check</div>'
+      +abtn(c.q,'Hear question')
+      +'<div style="font-size:46px;margin:4px 0 10px">🛡️</div>'
+      +'<div class="card-instruction" style="font-size:16px;max-width:320px;margin:0 auto 12px">'+c.q+'</div>'
+      +'<div class="yn-row">'
+      +'<button class="yn-btn '+yesCl+'" onclick="pickYN(true,'+c.answer+')" '+(prev!==undefined?'disabled':'')+'>✅ Yes</button>'
+      +'<button class="yn-btn '+noCl+'" onclick="pickYN(false,'+c.answer+')" '+(prev!==undefined?'disabled':'')+'>❌ No</button>'
+      +'</div>'+fb;
+
+  } else if(c.type==='scene_mc'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(ch,i){
+      var cl=prev!==undefined?(i===c.correct?'correct':(i===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" onclick="pickMC('+i+','+c.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-icon">'+ch.icon+'</span><span>'+ch.text+'</span></button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Great thinking!</div>':'<div class="feedback bad">The best answer is: '+c.choices[c.correct].text+'</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">What do you do?</div>'
+      +abtn(c.scene,'Hear the situation')
+      +'<div class="scene-box"><div class="scene-label">What happened</div>'+c.scene+'</div>'
+      +'<div class="card-hint">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='checklist'){
+    // Interactive checklist — not scored, just exploratory
+    var html='<div class="type-badge b-task">My checklist</div>'
+      +'<div style="font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:4px">'+c.title+'</div>'
+      +'<div class="card-hint">'+c.task+'</div>'
+      +'<div class="task-list">'
+      +c.steps.map(function(s,i){
+        var checked=window._checks&&window._checks[cur]&&window._checks[cur][i];
+        return '<div class="task-item '+(checked?'checked':'')+'" onclick="toggleCheck('+i+')">'
+          +'<div class="task-check '+(checked?'on':'')+'"></div>'
+          +'<div class="task-icon">'+s.icon+'</div>'
+          +'<div class="task-text">'+s.text+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+    b.innerHTML=html;
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='finish'){
+    var total=qCards.length;
+    var pct=Math.round((correct/total)*100);
+    var msg=pct===100?'Life skills champion!':pct>=60?'Great independence skills!':'Keep practising!';
+    b.innerHTML='<div style="font-size:60px;margin-bottom:8px">🏆</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Deck complete!</div>'
+      +'<div style="font-size:15px;color:#666;margin-bottom:16px">'+msg+'</div>'
+      +'<div class="score-row">'
+      +'<div class="sc" style="background:#EAF3DE;border-color:#97C459"><div class="sc-n" style="color:#3B6D11">'+correct+'</div><div class="sc-l">Correct</div></div>'
+      +'<div class="sc" style="background:#E6F1FB;border-color:#B5D4F4"><div class="sc-n" style="color:#185FA5">'+total+'</div><div class="sc-l">Questions</div></div>'
+      +'<div class="sc" style="background:#E1F5EE;border-color:#9FE1CB"><div class="sc-n" style="color:#0F6E56">'+pct+'%</div><div class="sc-l">Score</div></div>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #3B6D11;background:#EAF3DE">🌅</div><div class="bdg-lbl">Routine master</div></div>'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #185FA5;background:#E6F1FB">🛡️</div><div class="bdg-lbl">Safety star</div></div>'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #993556;background:#FBEAF0">🪥</div><div class="bdg-lbl">Hygiene hero</div></div>'
+      +(pct===100?'<div class="bdg"><div class="bdg-ring" style="border:3px solid #f0a500;background:#FAEEDA">🏆</div><div class="bdg-lbl">Perfect deck!</div></div>':'')
+      +'</div>'
+      +'<button class="replay-btn" onclick="restart()">Play again</button>';
+    document.getElementById('btn-next').disabled=true;
+    document.getElementById('btn-next').textContent='Done';
+  }
+}
+
+function renderSeq(c){
+  var b=document.getElementById('body');
+  var placed=_seqPlaced;
+  var nextPos=placed.length+1;
+  var html='<div class="type-badge b-seq">Put in order</div>'
+    +abtn(c.title,'Hear instructions')
+    +'<div class="card-instruction" style="font-size:16px;margin-bottom:4px">'+c.title+'</div>'
+    +'<div class="card-hint">Tap the steps in the correct order (1 → '+(c.correct.length)+').</div>'
+    +'<div class="seq-items">';
+  c.steps.forEach(function(s){
+    var placedIdx=placed.indexOf(s.order);
+    var isPlaced=placedIdx>=0;
+    var isWrong=_seqWrong===s.order;
+    var isPicked=_seqPicked===s.order;
+    var cl=isPlaced?'placed':isWrong?'wrong':isPicked?'picked':'';
+    html+='<div class="seq-item '+cl+'" id="si-'+s.order+'" onclick="seqTap('+s.order+')">'
+      +'<div class="seq-pos '+(isPlaced?'active':'')+'">'+(isPlaced?placedIdx+1:'?')+'</div>'
+      +'<div class="seq-icon">'+s.icon+'</div>'
+      +'<div class="seq-text">'+s.text+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  if(placed.length===c.correct.length) html+='<div class="feedback good">Perfect order! Well done!</div>';
+  b.innerHTML=html;
+}
+
+function seqTap(order){
+  var c=CARDS[cur];
+  if(ans[cur]!==undefined) return;
+  var expectedOrder=_seqPlaced.length+1;
+  var expectedStep=c.correct[expectedOrder-1];
+  if(expectedStep.order===order){
+    _seqPicked=null; _seqWrong=null;
+    _seqPlaced.push(order);
+    if(_seqPlaced.length===c.correct.length){
+      ans[cur]='done'; correct++;
+      updateChrome();
+    }
+  } else {
+    _seqWrong=order;
+    _seqPicked=null;
+    setTimeout(function(){ _seqWrong=null; renderSeq(c); },600);
+  }
+  renderSeq(c);
+}
+
+function toggleCheck(idx){
+  if(!window._checks) window._checks={};
+  if(!window._checks[cur]) window._checks[cur]={};
+  window._checks[cur][idx]=!window._checks[cur][idx];
+  render();
+}
+
+function pickMC(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function pickYN(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function goNext(){ if(cur<CARDS.length-1){cur++;_seqPicked=null;_seqPlaced=[];_seqWrong=null;render();} }
+function goBack(){ if(cur>0){cur--;_seqPicked=null;_seqPlaced=[];_seqWrong=null;render();} }
+function restart(){ cur=0;correct=0;ans={};_seqPicked=null;_seqPlaced=[];_seqWrong=null;window._checks={};render(); }
+render();
+</script>
+</body>
+</html>

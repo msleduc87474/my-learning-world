@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>How Am I Feeling? — Emotional Regulation · Level 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a2030;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .chrome { width: 100%; max-width: 580px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+  .deck-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); }
+  .card-ctr   { font-size: 13px; color: rgba(255,255,255,.5); }
+  .score-chip { background: #f0a500; border-radius: 99px; padding: 4px 13px; font-size: 12px; font-weight: 700; color: #fff; }
+  .prog-track { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,.15); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: #78d6b0; border-radius: 3px; transition: width .5s ease; }
+
+  .card { width: 100%; max-width: 580px; background: #fff; border-radius: 20px; overflow: hidden; min-height: 460px; display: flex; flex-direction: column; }
+  .stripe { height: 8px; transition: background .4s; }
+  .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 22px 14px; text-align: center; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-top: 1.5px solid #f0f0f0; }
+  .fn-back { padding: 10px 22px; border-radius: 99px; border: 2px solid #ddd; background: transparent; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
+  .fn-back:disabled { opacity: .3; cursor: default; }
+  .fn-back:not(:disabled):hover { background: #f5f5f5; }
+  .fn-next { padding: 10px 28px; border-radius: 99px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; color: #fff; background: #3C3489; }
+  .fn-next:disabled { opacity: .45; cursor: default; }
+  .fn-next:not(:disabled):hover { filter: brightness(1.12); }
+
+  /* Zone colors */
+  .zone-blue   { --zc: #185FA5; --zl: #E6F1FB; --zb: #B5D4F4; }
+  .zone-green  { --zc: #0F6E56; --zl: #E1F5EE; --zb: #9FE1CB; }
+  .zone-yellow { --zc: #854F0B; --zl: #FAEEDA; --zb: #FAC775; }
+  .zone-red    { --zc: #A32D2D; --zl: #FCEBEB; --zb: #F09595; }
+
+  .type-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  .b-learn    { background: #E1F5EE; color: #085041; }
+  .b-zone     { background: #E6F1FB; color: #0C447C; }
+  .b-body     { background: #FAEEDA; color: #633806; }
+  .b-mc       { background: #EEEDFE; color: #3C3489; }
+  .b-scenario { background: #FBEAF0; color: #72243E; }
+  .b-cope     { background: #EAF3DE; color: #27500A; }
+
+  .audio-btn { display: flex; align-items: center; gap: 7px; padding: 7px 16px; border-radius: 99px; border: 2px solid #dce; background: #f8f4ff; font-size: 13px; font-weight: 600; color: #534AB7; cursor: pointer; margin-bottom: 14px; }
+  .audio-btn:hover { background: #ece8ff; }
+  .spk { width: 18px; height: 18px; }
+
+  .card-instruction { font-size: 19px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.3; }
+  .card-hint        { font-size: 13px; color: #888; margin-bottom: 16px; }
+
+  /* Emotion face SVG */
+  .face-wrap { margin: 6px 0 14px; }
+
+  /* Zone pill */
+  .zone-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px; border-radius: 99px;
+    font-size: 16px; font-weight: 800; margin-bottom: 14px;
+    border: 2.5px solid;
+  }
+  .zone-dot { width: 14px; height: 14px; border-radius: 50%; }
+
+  /* Body clue cards */
+  .body-clues { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px; }
+  .body-clue  { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; border: 2px solid; font-size: 13px; font-weight: 600; }
+  .bc-icon    { font-size: 22px; flex-shrink: 0; }
+
+  /* Multiple choice */
+  .choices    { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    min-width: 100px; padding: 12px 14px; border-radius: 14px;
+    border: 3px solid #dde4f0; background: #fff;
+    font-size: 15px; font-weight: 700; color: #1a1a2e;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: transform .1s, border-color .15s, background .15s;
+    line-height: 1.3;
+  }
+  .choice-face { font-size: 32px; }
+  .choice:not(:disabled):hover  { transform: scale(1.07); }
+  .choice:not(:disabled):active { transform: scale(.93); }
+  .choice.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .choice.wrong   { border-color: #E24B4A; background: #FFEEEE; color: #a32d2d; }
+
+  /* Scenario card */
+  .scenario-box {
+    width: 100%; max-width: 360px; border-radius: 16px; padding: 16px 18px;
+    border: 2.5px solid #dde4f0; background: #f8f9ff;
+    font-size: 15px; color: #333; line-height: 1.6; margin-bottom: 16px; text-align: left;
+  }
+  .scenario-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+
+  /* Coping strategy picker */
+  .cope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+  .cope-card {
+    border-radius: 14px; border: 3px solid #dde4f0; background: #fff;
+    padding: 12px 10px; text-align: center; cursor: pointer;
+    transition: transform .1s, border-color .15s, background .15s;
+  }
+  .cope-icon  { font-size: 30px; margin-bottom: 5px; }
+  .cope-label { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.3; }
+  .cope-card:not(.disabled):hover  { transform: scale(1.06); }
+  .cope-card:not(.disabled):active { transform: scale(.93); }
+  .cope-card.correct { border-color: #1D9E75; background: #E1F5EE; }
+  .cope-card.correct .cope-label { color: #085041; }
+  .cope-card.wrong   { border-color: #E24B4A; background: #FFEEEE; }
+  .cope-card.wrong   .cope-label { color: #a32d2d; }
+  .cope-card.neutral { border-color: #B5D4F4; background: #f0f6ff; opacity: .6; cursor: default; }
+
+  /* Zone identifier — tap the zone */
+  .zone-cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .zone-card  {
+    width: 80px; padding: 12px 8px; border-radius: 14px; border: 3px solid transparent;
+    text-align: center; cursor: pointer; transition: transform .12s, border-color .15s;
+  }
+  .zone-card-icon  { font-size: 30px; margin-bottom: 4px; }
+  .zone-card-label { font-size: 12px; font-weight: 700; }
+  .zone-card:not(.disabled):hover  { transform: scale(1.1); }
+  .zone-card:not(.disabled):active { transform: scale(.92); }
+  .zone-card.correct { border-color: #1D9E75 !important; }
+  .zone-card.wrong   { border-color: #E24B4A !important; animation: shake .3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  @keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+
+  .feedback { font-size: 15px; font-weight: 700; margin-top: 12px; min-height: 22px; }
+  .feedback.good { color: #085041; }
+  .feedback.bad  { color: #a32d2d; }
+
+  /* Finish */
+  .score-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .sc    { border-radius: 14px; padding: 14px 18px; text-align: center; border: 2px solid; min-width: 82px; }
+  .sc-n  { font-size: 28px; font-weight: 800; }
+  .sc-l  { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+  .badges { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bdg   { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bdg-ring { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .bdg-lbl  { font-size: 10px; color: #888; text-align: center; line-height: 1.3; max-width: 64px; }
+  .replay-btn { padding: 12px 32px; border-radius: 99px; border: 2.5px solid #534AB7; background: transparent; color: #534AB7; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .replay-btn:hover { background: #f4f2ff; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="deck-title">How Am I Feeling?</span>
+  <span class="card-ctr" id="ctr">Card 1 of 16</span>
+  <span class="score-chip" id="chip">0 / 0</span>
+</div>
+<div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="card">
+  <div class="stripe" id="stripe"></div>
+  <div class="card-body" id="body"></div>
+  <div class="card-footer">
+    <button class="fn-back" id="btn-back" onclick="goBack()" disabled>Back</button>
+    <span style="font-size:12px;color:#bbb" id="nav-hint"></span>
+    <button class="fn-next" id="btn-next" onclick="goNext()">Start deck</button>
+  </div>
+</div>
+
+<script>
+var cur=0, correct=0, ans={};
+
+/* ── Zone + emotion data ───────────────────────────────────────────── */
+var ZONES = {
+  blue:   { label:'Blue zone',   color:'#185FA5', light:'#E6F1FB', border:'#B5D4F4', dot:'#378ADD', desc:'Low energy, slow, tired or sad',      emoji:'🔵' },
+  green:  { label:'Green zone',  color:'#0F6E56', light:'#E1F5EE', border:'#9FE1CB', dot:'#1D9E75', desc:'Calm, happy, focused and ready',       emoji:'🟢' },
+  yellow: { label:'Yellow zone', color:'#854F0B', light:'#FAEEDA', border:'#FAC775', dot:'#BA7517', desc:'Excited, worried, silly or frustrated', emoji:'🟡' },
+  red:    { label:'Red zone',    color:'#A32D2D', light:'#FCEBEB', border:'#F09595', dot:'#E24B4A', desc:'Very upset, angry or out of control',   emoji:'🔴' }
+};
+
+var FEELINGS = [
+  { name:'Happy',     zone:'green',  face:'😊', body:['Heart feels warm','Smiling face','Light and bouncy'], cope:null },
+  { name:'Sad',       zone:'blue',   face:'😢', body:['Tears in eyes','Heavy chest','Quiet voice'],          cope:'deep-breath' },
+  { name:'Calm',      zone:'green',  face:'😌', body:['Slow breathing','Relaxed body','Quiet mind'],         cope:null },
+  { name:'Angry',     zone:'red',    face:'😠', body:['Hot face','Tight fists','Fast heartbeat'],            cope:'squeeze' },
+  { name:'Worried',   zone:'yellow', face:'😟', body:['Tummy butterflies','Shaky hands','Fast thoughts'],    cope:'deep-breath' },
+  { name:'Excited',   zone:'yellow', face:'🤩', body:['Big smile','Bouncy body','Loud voice'],               cope:null },
+  { name:'Tired',     zone:'blue',   face:'😴', body:['Heavy eyelids','Slow body','Hard to focus'],          cope:'stretch' },
+  { name:'Frustrated',zone:'yellow', face:'😤', body:['Frowning face','Tight shoulders','Loud breathing'],   cope:'squeeze' }
+];
+
+var COPING = [
+  { id:'deep-breath', label:'Take deep breaths',  icon:'🌬️', zones:['blue','yellow','red'] },
+  { id:'squeeze',     label:'Squeeze a fidget',    icon:'🤜', zones:['yellow','red'] },
+  { id:'stretch',     label:'Do a body stretch',   icon:'🙆', zones:['blue','yellow'] },
+  { id:'walk',        label:'Take a short walk',   icon:'🚶', zones:['red','yellow'] },
+  { id:'water',       label:'Drink some water',    icon:'💧', zones:['blue','yellow'] },
+  { id:'draw',        label:'Draw your feelings',  icon:'🎨', zones:['blue','yellow'] }
+];
+
+var CARDS = [
+  { type:'intro' },
+  // Zone introductions
+  { type:'zone', z:'green'  },
+  { type:'zone', z:'blue'   },
+  { type:'zone', z:'yellow' },
+  { type:'zone', z:'red'    },
+  // Feeling learn cards
+  { type:'learn', fi:0 }, // happy
+  { type:'learn', fi:1 }, // sad
+  { type:'learn', fi:3 }, // angry
+  { type:'learn', fi:4 }, // worried
+  // Name the feeling
+  { type:'mc_face', q:'How is this person feeling?', face:'😢', correct:1, choices:[0,1,5,2] },
+  { type:'mc_face', q:'How is this person feeling?', face:'😠', correct:3, choices:[3,0,4,2] },
+  // Which zone?
+  { type:'zone_sort', q:'Feeling worried goes in which zone?', feeling:'Worried', fi:4 },
+  { type:'zone_sort', q:'Feeling angry goes in which zone?',   feeling:'Angry',   fi:3 },
+  // Body clues
+  { type:'body_mc', q:'Which body clue tells you someone is angry?', correct:'Hot face', choices:['Hot face','Slow breathing','Smiling face','Heavy eyelids'], fi:3 },
+  // Scenario + coping
+  { type:'scenario', story:'You have been working hard and your pencil breaks. You feel really frustrated. What could you do to feel better?', correct:'squeeze', zone:'yellow' },
+  { type:'scenario', story:'You are at school and you miss your mum. You feel sad and teary. What could you do?', correct:'deep-breath', zone:'blue' },
+  { type:'finish' }
+];
+
+var quizTypes=['mc_face','zone_sort','body_mc','scenario'];
+var qCards=CARDS.filter(function(c){return quizTypes.indexOf(c.type)>=0;});
+
+function zoneStripe(z){ return z ? ZONES[z].color : '#534AB7'; }
+function cardStripe(c){
+  if(c.type==='zone')     return zoneStripe(c.z);
+  if(c.type==='learn')    return zoneStripe(FEELINGS[c.fi].zone);
+  if(c.type==='mc_face')  return '#534AB7';
+  if(c.type==='zone_sort')return ZONES[FEELINGS[c.fi].zone].color;
+  if(c.type==='body_mc')  return '#854F0B';
+  if(c.type==='scenario') return zoneStripe(c.zone);
+  if(c.type==='finish')   return '#1D9E75';
+  return '#534AB7';
+}
+
+function say(t){ if('speechSynthesis' in window){var u=new SpeechSynthesisUtterance(t);u.rate=.82;u.pitch=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);} }
+function abtn(text,label){ label=label||'Hear it'; return '<button class="audio-btn" onclick="say(\''+text.replace(/'/g,"\\'")+'\')">'+'<svg class="spk" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'+label+'</button>'; }
+
+function faceSVG(expr, size){
+  size=size||90;
+  var faces={
+    '😊':'M30 50 Q50 68 70 50',
+    '😢':'M30 60 Q50 42 70 60',
+    '😠':'M28 56 Q50 44 72 56',
+    '😟':'M32 58 Q50 46 68 58',
+    '😌':'M34 52 Q50 58 66 52',
+    '😴':'M30 54 Q50 62 70 54',
+    '🤩':'M30 50 Q50 68 70 50',
+    '😤':'M28 54 Q50 42 72 54'
+  };
+  var eyes = (expr==='😴') ? '<line x1="32" y1="42" x2="42" y2="42" stroke="#333" stroke-width="3" stroke-linecap="round"/><line x1="58" y1="42" x2="68" y2="42" stroke="#333" stroke-width="3" stroke-linecap="round"/>' : '<circle cx="37" cy="42" r="5" fill="#333"/><circle cx="63" cy="42" r="5" fill="#333"/>';
+  var extra = '';
+  if(expr==='😢') extra='<path d="M37 50 Q38 62 36 68" stroke="#6bb3f0" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+  if(expr==='😠'||expr==='😤') extra='<path d="M28 32 Q37 38 46 34" stroke="#333" stroke-width="2.5" fill="none"/><path d="M54 34 Q63 38 72 32" stroke="#333" stroke-width="2.5" fill="none"/>';
+  if(expr==='🤩') extra='<path d="M28 36 L46 28 M54 28 L72 36" stroke="#f0a500" stroke-width="3" stroke-linecap="round"/>';
+  if(expr==='😟') extra='<path d="M28 34 Q37 30 46 36" stroke="#333" stroke-width="2" fill="none"/><path d="M54 36 Q63 30 72 34" stroke="#333" stroke-width="2" fill="none"/>';
+  var mouthPath = faces[expr] || faces['😊'];
+  var bgColors={'😊':'#FAEEDA','😢':'#E6F1FB','😠':'#FCEBEB','😟':'#FAEEDA','😌':'#E1F5EE','😴':'#E6F1FB','🤩':'#FAEEDA','😤':'#FCEBEB'};
+  var faceColor = bgColors[expr]||'#f5f5f5';
+  return '<svg viewBox="0 0 100 100" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg">'
+    +'<circle cx="50" cy="50" r="46" fill="'+faceColor+'" stroke="#e0e0e0" stroke-width="1.5"/>'
+    +eyes+extra
+    +'<path d="'+mouthPath+'" stroke="#333" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+    +'</svg>';
+}
+
+function updateChrome(){
+  document.getElementById('ctr').textContent='Card '+(cur+1)+' of '+CARDS.length;
+  var pct=cur===0?0:cur>=CARDS.length-1?100:Math.round((cur/(CARDS.length-2))*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('chip').textContent=correct+' / '+qCards.length;
+  document.getElementById('stripe').style.background=cardStripe(CARDS[cur]);
+  document.getElementById('btn-back').disabled=cur===0;
+  var nxt=document.getElementById('btn-next');
+  var c=CARDS[cur];
+  nxt.disabled=quizTypes.indexOf(c.type)>=0&&ans[cur]===undefined;
+  nxt.textContent=cur===0?'Start deck':cur>=CARDS.length-2?'See results':'Next card';
+  nxt.style.background=cardStripe(CARDS[cur]);
+}
+
+function render(){
+  updateChrome();
+  var c=CARDS[cur];
+  var b=document.getElementById('body');
+
+  if(c.type==='intro'){
+    b.innerHTML='<div style="font-size:60px;margin-bottom:10px">💛</div>'
+      +'<div class="type-badge b-learn">Emotional Regulation · Level 1</div>'
+      +'<div class="card-instruction">How Am I Feeling?</div>'
+      +'<div class="card-hint" style="max-width:290px;line-height:1.6">Learn to name your feelings, spot body clues, and find your zone. Then choose a coping strategy to feel better.</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#FAEEDA;color:#633806;font-weight:600">16 cards</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#EEEDFE;color:#3C3489;font-weight:600">Zones of Regulation</span>'
+      +'<span style="font-size:12px;padding:4px 12px;border-radius:99px;background:#E1F5EE;color:#085041;font-weight:600">Coping strategies</span>'
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='zone'){
+    var z=ZONES[c.z];
+    var zFeelings=FEELINGS.filter(function(f){return f.zone===c.z;});
+    b.innerHTML='<div class="type-badge b-zone">Zone of regulation</div>'
+      +abtn(z.label+'. '+z.desc,'Hear about this zone')
+      +'<div class="zone-pill" style="background:'+z.light+';border-color:'+z.dot+';color:'+z.color+'">'
+      +'<div class="zone-dot" style="background:'+z.dot+'"></div>'+z.label+'</div>'
+      +'<div style="font-size:14px;color:#555;margin-bottom:16px;max-width:280px;line-height:1.5">'+z.desc+'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
+      +zFeelings.map(function(f){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;border-radius:14px;background:'+z.light+';border:2px solid '+z.border+'">'
+          +'<div style="font-size:36px">'+f.face+'</div>'
+          +'<div style="font-size:12px;font-weight:700;color:'+z.color+'">'+f.name+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='learn'){
+    var f=FEELINGS[c.fi];
+    var z=ZONES[f.zone];
+    b.innerHTML='<div class="type-badge b-learn">Learn</div>'
+      +abtn(f.name+'. '+f.body.join('. '),'Hear about '+f.name)
+      +'<div class="face-wrap">'+faceSVG(f.face,100)+'</div>'
+      +'<div style="font-size:26px;font-weight:800;color:#1a1a2e;margin-bottom:6px">'+f.name+'</div>'
+      +'<div class="zone-pill" style="background:'+z.light+';border-color:'+z.dot+';color:'+z.color+';font-size:13px;padding:5px 14px;margin-bottom:12px">'
+      +'<div class="zone-dot" style="background:'+z.dot+'"></div>'+z.label+'</div>'
+      +'<div class="body-clues">'
+      +f.body.map(function(clue){
+        return '<div class="body-clue" style="background:'+z.light+';border-color:'+z.border+';color:'+z.color+'">'
+          +'<span class="bc-icon">🫀</span><span>'+clue+'</span></div>';
+      }).join('')
+      +'</div>';
+    document.getElementById('btn-next').disabled=false;
+
+  } else if(c.type==='mc_face'){
+    var prev=ans[cur];
+    var btns=c.choices.map(function(fi){
+      var f=FEELINGS[fi];
+      var cl=prev!==undefined?(fi===c.correct?'correct':(fi===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" onclick="pickMC('+fi+','+c.correct+')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span class="choice-face">'+faceSVG(f.face,44)+'</span>'
+        +'<span>'+f.name+'</span>'
+        +'</button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Yes! That is '+FEELINGS[c.correct].name+'!</div>':'<div class="feedback bad">That feeling is '+FEELINGS[c.correct].name+'.</div>'):'';
+    b.innerHTML='<div class="type-badge b-mc">Name the feeling</div>'
+      +abtn(c.q,'Hear question')
+      +'<div class="face-wrap">'+faceSVG(c.face,90)+'</div>'
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='zone_sort'){
+    var f=FEELINGS[c.fi];
+    var z=ZONES[f.zone];
+    var prev=ans[cur];
+    var zKeys=['blue','green','yellow','red'];
+    var zoneBtns=zKeys.map(function(zk){
+      var zd=ZONES[zk];
+      var cl=prev!==undefined?(zk===f.zone?'correct':(zk===prev?'wrong':'')):'';
+      return '<div class="zone-card '+cl+' '+(prev!==undefined?'disabled':'')+'" onclick="pickZone(\''+zk+'\',\''+f.zone+'\')" style="background:'+zd.light+';border-color:'+(prev===undefined?zd.border:'')+'">'
+        +'<div class="zone-card-icon">'+zd.emoji+'</div>'
+        +'<div class="zone-card-label" style="color:'+zd.color+'">'+zd.label.replace(' zone','')+'</div>'
+        +'</div>';
+    }).join('');
+    var fb=prev!==undefined?(prev===f.zone?'<div class="feedback good">Correct! '+f.name+' is in the '+z.label+'.</div>':'<div class="feedback bad">'+f.name+' belongs in the '+z.label+'.</div>'):'';
+    b.innerHTML='<div class="type-badge b-zone">Which zone?</div>'
+      +abtn(c.q+' Tap the right zone colour.','Hear question')
+      +'<div class="face-wrap">'+faceSVG(f.face,80)+'</div>'
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="card-hint">Tap the right zone colour.</div>'
+      +'<div class="zone-cards">'+zoneBtns+'</div>'+fb;
+
+  } else if(c.type==='body_mc'){
+    var prev=ans[cur];
+    var f=FEELINGS[c.fi];
+    var btns=c.choices.map(function(clue){
+      var cl=prev!==undefined?(clue===c.correct?'correct':(clue===prev?'wrong':'')):'';
+      return '<button class="choice '+cl+'" style="font-size:13px;min-width:130px" onclick="pickBodyMC(\''+clue.replace(/'/g,"\\'")+'\',\''+c.correct.replace(/'/g,"\\'")+'\',\''+c.fi+'\')" '+(prev!==undefined?'disabled':'')+'>'
+        +'<span style="font-size:22px;margin-bottom:4px">🫀</span><span>'+clue+'</span></button>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Yes! That is a body clue for feeling angry!</div>':'<div class="feedback bad">The clue for angry is "'+c.correct+'".</div>'):'';
+    b.innerHTML='<div class="type-badge b-body">Body clues</div>'
+      +abtn(c.q,'Hear question')
+      +'<div class="face-wrap">'+faceSVG(f.face,80)+'</div>'
+      +'<div class="card-instruction">'+c.q+'</div>'
+      +'<div class="choices">'+btns+'</div>'+fb;
+
+  } else if(c.type==='scenario'){
+    var prev=ans[cur];
+    var z=ZONES[c.zone];
+    var copesForZone=COPING.filter(function(cp){return cp.zones.indexOf(c.zone)>=0;});
+    // add one distractor
+    var others=COPING.filter(function(cp){return cp.zones.indexOf(c.zone)<0;});
+    var options=copesForZone.concat(others.slice(0,2)).sort(function(){return Math.random()-.5;}).slice(0,4);
+    // ensure correct in list
+    if(!options.some(function(o){return o.id===c.correct;})){options[0]=COPING.find(function(cp){return cp.id===c.correct;});}
+    var cards=options.map(function(cp){
+      var cl=prev!==undefined?(cp.id===c.correct?'correct':(cp.id===prev?'wrong':'neutral')):'';
+      return '<div class="cope-card '+cl+' '+(prev!==undefined?'disabled':'')+'" onclick="pickScenario(\''+cp.id+'\',\''+c.correct+'\')">'
+        +'<div class="cope-icon">'+cp.icon+'</div>'
+        +'<div class="cope-label">'+cp.label+'</div>'
+        +'</div>';
+    }).join('');
+    var fb=prev!==undefined?(prev===c.correct?'<div class="feedback good">Great choice! That can really help!</div>':'<div class="feedback bad">A good choice here is to '+COPING.find(function(cp){return cp.id===c.correct;}).label.toLowerCase()+'.</div>'):'';
+    b.innerHTML='<div class="type-badge b-scenario">Coping strategy</div>'
+      +abtn(c.story,'Hear the story')
+      +'<div class="scenario-box"><div class="scenario-label">What happened?</div>'+c.story+'</div>'
+      +'<div class="card-hint">Which coping strategy would help?</div>'
+      +'<div class="cope-grid">'+cards+'</div>'+fb;
+
+  } else if(c.type==='finish'){
+    var total=qCards.length;
+    var pct=Math.round((correct/total)*100);
+    var msg=pct===100?'Feelings expert!':pct>=60?'Great self-awareness!':'Keep practising!';
+    b.innerHTML='<div style="font-size:60px;margin-bottom:8px">💛</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:4px">Deck complete!</div>'
+      +'<div style="font-size:15px;color:#666;margin-bottom:16px">'+msg+'</div>'
+      +'<div class="score-row">'
+      +'<div class="sc" style="background:#FAEEDA;border-color:#FAC775"><div class="sc-n" style="color:#854F0B">'+correct+'</div><div class="sc-l">Correct</div></div>'
+      +'<div class="sc" style="background:#EEEDFE;border-color:#AFA9EC"><div class="sc-n" style="color:#534AB7">'+total+'</div><div class="sc-l">Questions</div></div>'
+      +'<div class="sc" style="background:#E1F5EE;border-color:#9FE1CB"><div class="sc-n" style="color:#0F6E56">'+pct+'%</div><div class="sc-l">Score</div></div>'
+      +'</div>'
+      +'<div class="badges">'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #7F77DD;background:#EEEDFE">🧠</div><div class="bdg-lbl">Feelings finder</div></div>'
+      +'<div class="bdg"><div class="bdg-ring" style="border:3px solid #1D9E75;background:#E1F5EE">💚</div><div class="bdg-lbl">Zone expert</div></div>'
+      +(pct===100?'<div class="bdg"><div class="bdg-ring" style="border:3px solid #f0a500;background:#FAEEDA">🏆</div><div class="bdg-lbl">Perfect deck!</div></div>':'')
+      +'</div>'
+      +'<button class="replay-btn" onclick="restart()">Play again</button>';
+    document.getElementById('btn-next').disabled=true;
+    document.getElementById('btn-next').textContent='Done';
+  }
+}
+
+function pickMC(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function pickZone(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function pickBodyMC(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function pickScenario(chosen,corr){ if(ans[cur]!==undefined)return; ans[cur]=chosen; if(chosen===corr)correct++; updateChrome();render(); }
+function goNext(){ if(cur<CARDS.length-1){cur++;render();} }
+function goBack(){ if(cur>0){cur--;render();} }
+function restart(){ cur=0;correct=0;ans={};render(); }
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Visual Timer — My Learning World</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f0f4f8;
+  --card:    #ffffff;
+  --ink:     #1c2b3a;
+  --muted:   #6b80a0;
+  --border:  #dce8f4;
+  --r:       18px;
+
+  /* Timer color vars — shift as time runs out */
+  --tc-full:    #1a8a68;  /* teal — plenty of time */
+  --tc-mid:     #2a6fa8;  /* blue — halfway */
+  --tc-low:     #d68a10;  /* amber — getting low */
+  --tc-end:     #c84040;  /* red — almost done */
+  --tc-current: #1a8a68;
+
+  --tc-bg-full: #e4f7f1;
+  --tc-bg-current: #e4f7f1;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ── Background gradient that shifts with urgency ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--tc-bg-current, #e4f7f1) 0%, transparent 70%);
+  opacity: .6;
+  transition: background 4s ease;
+  pointer-events: none;
+}
+
+.app { position: relative; z-index: 1; width: 100%; max-width: 520px; padding: 24px 20px 48px; }
+
+/* ── Header ── */
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.brand  { display: flex; align-items: center; gap: 10px; }
+.brand-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--tc-current); display: flex; align-items: center;
+  justify-content: center; font-size: 20px; color: white;
+  transition: background 3s ease;
+}
+.brand-text { font-size: 14px; font-weight: 900; color: var(--ink); line-height: 1.2; }
+.brand-sub  { font-size: 11px; color: var(--muted); font-weight: 600; }
+.settings-toggle {
+  width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; transition: background .15s;
+}
+.settings-toggle:hover { background: var(--border); }
+
+/* ── Label selector ── */
+.label-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px; scrollbar-width: none; }
+.label-strip::-webkit-scrollbar { display: none; }
+.label-pill {
+  flex-shrink: 0; padding: 8px 18px; border-radius: 99px;
+  border: 2px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 800; color: var(--muted);
+  cursor: pointer; white-space: nowrap; transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.label-pill:hover { border-color: var(--tc-current); color: var(--tc-current); }
+.label-pill.active { border-color: var(--tc-current); color: var(--tc-current); background: var(--tc-bg-current); }
+
+/* ── Timer circle ── */
+.timer-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 28px;
+}
+.timer-svg-wrap {
+  position: relative; width: 300px; height: 300px;
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.timer-svg-wrap:active { transform: scale(.98); }
+.timer-svg { width: 300px; height: 300px; transform: rotate(-90deg); }
+
+/* Track ring */
+.ring-track { fill: none; stroke: var(--border); stroke-width: 22; }
+/* Progress ring */
+.ring-progress {
+  fill: none; stroke: var(--tc-current); stroke-width: 22;
+  stroke-linecap: round;
+  stroke-dasharray: 816; /* 2π × 130 ≈ 816 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 3s ease;
+}
+/* Tick marks */
+.ring-ticks { fill: none; stroke: var(--card); stroke-width: 2; opacity: .35; }
+
+/* Center display */
+.timer-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+}
+.timer-time {
+  font-size: 68px; font-weight: 900; color: var(--ink); line-height: 1;
+  letter-spacing: -2px; font-variant-numeric: tabular-nums;
+  transition: color 3s ease;
+}
+.timer-time.urgent { color: var(--tc-end); animation: urgentPulse 1s ease-in-out infinite; }
+@keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+.timer-label-center { font-size: 15px; font-weight: 800; color: var(--muted); margin-top: 2px; }
+.timer-state { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 4px; letter-spacing: .03em; }
+
+/* Tap hint */
+.tap-hint { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 12px; text-align: center; opacity: .7; }
+
+/* ── Preset grid ── */
+.preset-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+.preset-grid  { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-bottom: 22px; }
+.preset-btn {
+  border-radius: 14px; border: 2px solid var(--border); background: var(--card);
+  padding: 12px 8px; text-align: center; cursor: pointer;
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), border-color .15s, background .15s;
+}
+.preset-btn:hover  { transform: scale(1.07); border-color: var(--tc-current); }
+.preset-btn:active { transform: scale(.95); }
+.preset-btn.active { border-color: var(--tc-current); background: var(--tc-bg-current); }
+.preset-min  { font-size: 20px; font-weight: 900; color: var(--ink); line-height: 1; }
+.preset-unit { font-size: 10px; font-weight: 700; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Custom time input row */
+.custom-row { display: flex; gap: 8px; align-items: center; margin-bottom: 22px; }
+.custom-input {
+  flex: 1; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border);
+  font-size: 18px; font-weight: 900; font-family: 'Nunito', sans-serif;
+  color: var(--ink); text-align: center; outline: none;
+  transition: border-color .15s;
+}
+.custom-input:focus { border-color: var(--tc-current); }
+.custom-set {
+  padding: 11px 20px; border-radius: 12px; border: none;
+  background: var(--tc-current); color: white; font-size: 14px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; cursor: pointer; transition: opacity .15s, background 3s ease;
+}
+.custom-set:hover { opacity: .88; }
+
+/* ── Controls ── */
+.controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 22px; }
+.ctrl-btn {
+  flex: 1; max-width: 200px; padding: 16px 20px; border-radius: 16px;
+  font-size: 17px; font-weight: 900; font-family: 'Nunito', sans-serif;
+  cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .12s cubic-bezier(.34,1.56,.64,1), opacity .15s;
+}
+.ctrl-btn:active { transform: scale(.95); }
+.ctrl-btn:hover  { opacity: .88; }
+.ctrl-play  { background: var(--tc-current); color: white; transition: background 3s ease; }
+.ctrl-reset { background: var(--card); color: var(--muted); border: 2px solid var(--border); }
+.ctrl-plus  { background: var(--card); color: var(--muted); border: 2px solid var(--border); max-width: 60px; padding: 16px 0; font-size: 22px; }
+
+/* ── Done screen ── */
+.done-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(26, 138, 104, .92);
+  padding: 40px 24px;
+  animation: fadeInBig .5s ease both;
+}
+.done-overlay.show { display: flex; }
+@keyframes fadeInBig { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+.done-icon  { font-size: 90px; margin-bottom: 16px; animation: bounceDone .6s ease .1s both; }
+@keyframes bounceDone { 0%{transform:scale(0)} 70%{transform:scale(1.18)} 100%{transform:scale(1)} }
+.done-title { font-size: 38px; font-weight: 900; color: white; text-align: center; margin-bottom: 10px; line-height: 1.15; }
+.done-sub   { font-size: 18px; font-weight: 700; color: rgba(255,255,255,.8); text-align: center; margin-bottom: 36px; line-height: 1.5; }
+.done-btns  { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.done-btn {
+  padding: 15px 32px; border-radius: 99px; font-size: 17px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; cursor: pointer; border: none;
+  transition: opacity .15s, transform .12s;
+}
+.done-btn:active { transform: scale(.97); }
+.done-btn:hover  { opacity: .88; }
+.done-primary   { background: white; color: var(--teal); color: #1a8a68; }
+.done-secondary { background: rgba(255,255,255,.2); color: white; border: 2px solid rgba(255,255,255,.4); }
+
+/* ── Settings panel ── */
+.settings-panel {
+  background: var(--card); border-radius: var(--r); border: 1.5px solid var(--border);
+  padding: 18px 20px; margin-bottom: 20px; display: none;
+}
+.settings-panel.open { display: block; animation: slideDown .25s ease; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:none} }
+.sp-title { font-size: 13px; font-weight: 900; color: var(--ink); margin-bottom: 14px; }
+.sp-row   { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sp-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.sp-toggle {
+  width: 44px; height: 26px; border-radius: 13px; background: var(--border);
+  border: none; cursor: pointer; position: relative; transition: background .2s;
+}
+.sp-toggle.on { background: var(--tc-current); transition: background .2s, background 3s ease; }
+.sp-toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%; background: white;
+  transition: transform .2s;
+}
+.sp-toggle.on::after { transform: translateX(18px); }
+.colour-swatches { display: flex; gap: 8px; }
+.cs {
+  width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+  border: 2.5px solid transparent; transition: transform .12s;
+}
+.cs:hover { transform: scale(1.18); }
+.cs.active { border-color: var(--ink) !important; }
+
+/* ── Responsive ── */
+@media(max-width:380px){
+  .timer-svg-wrap { width: 260px; height: 260px; }
+  .timer-svg { width: 260px; height: 260px; }
+  .timer-time { font-size: 56px; }
+  .preset-grid { grid-template-columns: repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Done overlay -->
+<div class="done-overlay" id="done-overlay">
+  <div class="done-icon" id="done-icon">🎉</div>
+  <div class="done-title" id="done-title">Time is up!</div>
+  <div class="done-sub"  id="done-sub">Great work. Well done for staying on task.</div>
+  <div class="done-btns">
+    <button class="done-btn done-secondary" onclick="resetTimer(); hideDone()">Set new timer</button>
+    <button class="done-btn done-primary"   onclick="hideDone()">Done ✓</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon" id="brand-icon">⏱️</div>
+      <div>
+        <div class="brand-text">Visual Timer</div>
+        <div class="brand-sub">My Learning World</div>
+      </div>
+    </div>
+    <div class="settings-toggle" onclick="toggleSettings()" title="Settings">⚙️</div>
+  </div>
+
+  <!-- Settings panel -->
+  <div class="settings-panel" id="settings-panel">
+    <div class="sp-title">Timer settings</div>
+    <div class="sp-row">
+      <span class="sp-label">Sound when done</span>
+      <button class="sp-toggle on" id="toggle-sound" onclick="toggleOption('sound')"></button>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Colour changes as time runs out</span>
+      <button class="sp-toggle on" id="toggle-colour" onclick="toggleOption('colour')"></button>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Show minutes on ring</span>
+      <button class="sp-toggle on" id="toggle-ticks" onclick="toggleOption('ticks')"></button>
+    </div>
+    <div class="sp-row" style="margin-bottom:0">
+      <span class="sp-label">Colour theme</span>
+      <div class="colour-swatches">
+        <div class="cs active" data-c="teal"   style="background:#1a8a68" onclick="setTheme(this,'#1a8a68','#e4f7f1')"></div>
+        <div class="cs"        data-c="blue"   style="background:#2a6fa8" onclick="setTheme(this,'#2a6fa8','#e8f3fc')"></div>
+        <div class="cs"        data-c="purple" style="background:#5346c8" onclick="setTheme(this,'#5346c8','#eeecfb')"></div>
+        <div class="cs"        data-c="rose"   style="background:#a03060" onclick="setTheme(this,'#a03060','#fdf0f5')"></div>
+        <div class="cs"        data-c="amber"  style="background:#9a5a0a" onclick="setTheme(this,'#9a5a0a','#fef5e4')"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity label strip -->
+  <div class="label-strip" id="label-strip">
+    <div class="label-pill active" data-msg="Time to work" data-icon="📚" onclick="setLabel(this)">📚 Work time</div>
+    <div class="label-pill" data-msg="Break time — relax!" data-icon="☕" onclick="setLabel(this)">☕ Break</div>
+    <div class="label-pill" data-msg="Time to tidy up" data-icon="🧹" onclick="setLabel(this)">🧹 Tidy up</div>
+    <div class="label-pill" data-msg="Finish what you are doing" data-icon="⏰" onclick="setLabel(this)">⏰ Wrap up</div>
+    <div class="label-pill" data-msg="Time to move!" data-icon="🚶" onclick="setLabel(this)">🚶 Movement</div>
+    <div class="label-pill" data-msg="Reading time" data-icon="📖" onclick="setLabel(this)">📖 Reading</div>
+    <div class="label-pill" data-msg="Quiet time" data-icon="🤫" onclick="setLabel(this)">🤫 Quiet time</div>
+  </div>
+
+  <!-- Timer circle -->
+  <div class="timer-wrap">
+    <div class="timer-svg-wrap" onclick="tapCircle()" title="Tap to start / pause">
+      <svg class="timer-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Track -->
+        <circle class="ring-track" cx="150" cy="150" r="130"/>
+        <!-- Tick marks (generated by JS) -->
+        <g id="tick-group"></g>
+        <!-- Progress -->
+        <circle class="ring-progress" id="ring-progress" cx="150" cy="150" r="130"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-time" id="timer-time">5:00</div>
+        <div class="timer-label-center" id="timer-label-center">📚 Work time</div>
+        <div class="timer-state" id="timer-state">Tap to start</div>
+      </div>
+    </div>
+    <div class="tap-hint" id="tap-hint">Tap the circle to start · Tap again to pause</div>
+  </div>
+
+  <!-- Preset grid -->
+  <div class="preset-label">Quick set</div>
+  <div class="preset-grid">
+    <div class="preset-btn" onclick="setPreset(1)">  <div class="preset-min">1</div>  <div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(2)">  <div class="preset-min">2</div>  <div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(3)">  <div class="preset-min">3</div>  <div class="preset-unit">min</div></div>
+    <div class="preset-btn active" onclick="setPreset(5)"><div class="preset-min">5</div><div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(10)"> <div class="preset-min">10</div> <div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(15)"> <div class="preset-min">15</div> <div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(20)"> <div class="preset-min">20</div> <div class="preset-unit">min</div></div>
+    <div class="preset-btn" onclick="setPreset(30)"> <div class="preset-min">30</div> <div class="preset-unit">min</div></div>
+  </div>
+
+  <!-- Custom time -->
+  <div class="custom-row">
+    <input class="custom-input" id="custom-input" type="number" min="1" max="99" placeholder="_ _ min" value="">
+    <button class="custom-set" id="custom-set-btn" onclick="setCustom()">Set</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn ctrl-reset" onclick="resetTimer()">↺ Reset</button>
+    <button class="ctrl-btn ctrl-play"  id="play-btn" onclick="togglePlay()">▶ Start</button>
+    <button class="ctrl-btn ctrl-plus"  onclick="addMinute()" title="Add 1 minute">+1</button>
+  </div>
+
+</div><!-- end .app -->
+
+<script>
+/* ══════════════════════ STATE ══════════════════════ */
+var CIRCUMFERENCE = 2 * Math.PI * 130; // ~816.8
+var _totalSecs  = 5 * 60;
+var _remaining  = 5 * 60;
+var _running    = false;
+var _interval   = null;
+var _labelMsg   = 'Time to work';
+var _labelIcon  = '📚';
+
+var _opts = { sound: true, colour: true, ticks: true };
+var _themeMain = '#1a8a68';
+var _themeBg   = '#e4f7f1';
+
+/* ══════════════════════ COLOUR THEMING ══════════════════════ */
+function applyTheme(main, bg) {
+  _themeMain = main; _themeBg = bg;
+  document.documentElement.style.setProperty('--tc-current', main);
+  document.documentElement.style.setProperty('--tc-bg-current', bg);
+  document.getElementById('brand-icon').style.background = main;
+  document.getElementById('custom-set-btn').style.background = main;
+  document.getElementById('play-btn').style.background = main;
+  document.querySelectorAll('.label-pill.active').forEach(function(el){ el.style.borderColor = main; el.style.color = main; el.style.background = bg; });
+  document.querySelectorAll('.preset-btn.active').forEach(function(el){ el.style.borderColor = main; el.style.background = bg; });
+  document.getElementById('ring-progress').style.stroke = main;
+  updateUrgencyColour();
+}
+
+function updateUrgencyColour() {
+  if(!_opts.colour) return;
+  var pct = _totalSecs > 0 ? _remaining / _totalSecs : 1;
+  var col, bg;
+  if(pct > 0.5)      { col = _themeMain; bg = _themeBg; }
+  else if(pct > 0.2) { col = '#d68a10';  bg = '#fef5e4'; }
+  else if(pct > 0)   { col = '#c84040';  bg = '#ffefef'; }
+  else               { col = _themeMain; bg = _themeBg; }
+  document.getElementById('ring-progress').style.stroke = col;
+  document.getElementById('timer-time').style.color = pct <= 0.1 && _remaining > 0 ? '#c84040' : '#1c2b3a';
+  document.getElementById('timer-time').className = 'timer-time' + (pct <= 0.1 && _remaining > 0 && _running ? ' urgent' : '');
+  document.documentElement.style.setProperty('--tc-bg-current', bg);
+}
+
+/* ══════════════════════ TICK MARKS ══════════════════════ */
+function renderTicks() {
+  var g = document.getElementById('tick-group');
+  g.innerHTML = '';
+  if(!_opts.ticks) return;
+  var totalMins = Math.round(_totalSecs / 60);
+  if(totalMins < 1 || totalMins > 60) return;
+  var step = totalMins <= 10 ? 1 : totalMins <= 20 ? 2 : 5;
+  for(var m = 0; m <= totalMins; m += step) {
+    var angle = (m / totalMins) * 2 * Math.PI - Math.PI / 2;
+    var r1 = 118, r2 = 130;
+    var x1 = 150 + r1 * Math.cos(angle);
+    var y1 = 150 + r1 * Math.sin(angle);
+    var x2 = 150 + r2 * Math.cos(angle);
+    var y2 = 150 + r2 * Math.sin(angle);
+    var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x1.toFixed(1)); line.setAttribute('y1', y1.toFixed(1));
+    line.setAttribute('x2', x2.toFixed(1)); line.setAttribute('y2', y2.toFixed(1));
+    line.setAttribute('stroke', '#ffffff'); line.setAttribute('stroke-width', m===0||m===totalMins ? '3' : '1.5');
+    line.setAttribute('opacity', '.5');
+    g.appendChild(line);
+  }
+}
+
+/* ══════════════════════ RING DRAWING ══════════════════════ */
+function drawRing() {
+  var pct = _totalSecs > 0 ? _remaining / _totalSecs : 0;
+  pct = Math.max(0, Math.min(1, pct));
+  var offset = CIRCUMFERENCE * (1 - pct);
+  document.getElementById('ring-progress').style.strokeDasharray = CIRCUMFERENCE;
+  document.getElementById('ring-progress').style.strokeDashoffset = offset;
+  updateUrgencyColour();
+}
+
+/* ══════════════════════ TIME DISPLAY ══════════════════════ */
+function fmtTime(s) {
+  s = Math.max(0, s);
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function updateDisplay() {
+  document.getElementById('timer-time').textContent = fmtTime(_remaining);
+  var stateEl = document.getElementById('timer-state');
+  if(_remaining <= 0)      stateEl.textContent = 'All done!';
+  else if(_running)        stateEl.textContent = 'Running…';
+  else if(_remaining === _totalSecs) stateEl.textContent = 'Tap to start';
+  else                     stateEl.textContent = 'Paused';
+  drawRing();
+}
+
+/* ══════════════════════ TIMER LOGIC ══════════════════════ */
+function togglePlay() {
+  if(_remaining <= 0) { resetTimer(); return; }
+  if(_running) pauseTimer(); else startTimer();
+}
+
+function tapCircle() { togglePlay(); }
+
+function startTimer() {
+  if(_remaining <= 0) return;
+  _running = true;
+  document.getElementById('play-btn').textContent = '⏸ Pause';
+  clearInterval(_interval);
+  _interval = setInterval(function() {
+    if(!_running) return;
+    _remaining = Math.max(0, _remaining - 1);
+    updateDisplay();
+    if(_remaining <= 0) {
+      clearInterval(_interval);
+      _running = false;
+      document.getElementById('play-btn').textContent = '▶ Start';
+      onTimerDone();
+    }
+  }, 1000);
+  updateDisplay();
+}
+
+function pauseTimer() {
+  _running = false;
+  clearInterval(_interval);
+  document.getElementById('play-btn').textContent = '▶ Resume';
+  updateDisplay();
+}
+
+function resetTimer() {
+  pauseTimer();
+  _remaining = _totalSecs;
+  document.getElementById('play-btn').textContent = '▶ Start';
+  document.getElementById('timer-time').className = 'timer-time';
+  renderTicks();
+  updateDisplay();
+}
+
+function addMinute() {
+  _totalSecs  += 60;
+  _remaining  += 60;
+  renderTicks();
+  updateDisplay();
+}
+
+function onTimerDone() {
+  document.getElementById('timer-time').className = 'timer-time';
+  drawRing();
+  if(_opts.sound) playDone();
+  showDone();
+}
+
+/* ══════════════════════ PRESETS ══════════════════════ */
+function setPreset(mins) {
+  pauseTimer();
+  _totalSecs = mins * 60;
+  _remaining = mins * 60;
+  document.querySelectorAll('.preset-btn').forEach(function(b){ b.classList.remove('active'); b.style.borderColor=''; b.style.background=''; });
+  var btns = document.querySelectorAll('.preset-btn');
+  var presets = [1,2,3,5,10,15,20,30];
+  presets.forEach(function(m, i){ if(m===mins){ btns[i].classList.add('active'); btns[i].style.borderColor=_themeMain; btns[i].style.background=_themeBg; } });
+  document.getElementById('play-btn').textContent = '▶ Start';
+  document.getElementById('timer-time').className = 'timer-time';
+  document.getElementById('custom-input').value = '';
+  renderTicks();
+  updateDisplay();
+}
+
+function setCustom() {
+  var val = parseInt(document.getElementById('custom-input').value);
+  if(!val || val < 1 || val > 99) return;
+  pauseTimer();
+  _totalSecs = val * 60;
+  _remaining = val * 60;
+  document.querySelectorAll('.preset-btn').forEach(function(b){ b.classList.remove('active'); b.style.borderColor=''; b.style.background=''; });
+  document.getElementById('play-btn').textContent = '▶ Start';
+  document.getElementById('timer-time').className = 'timer-time';
+  renderTicks();
+  updateDisplay();
+}
+document.getElementById('custom-input').addEventListener('keydown', function(e){ if(e.key==='Enter') setCustom(); });
+
+/* ══════════════════════ LABEL ══════════════════════ */
+function setLabel(el) {
+  document.querySelectorAll('.label-pill').forEach(function(p){ p.classList.remove('active'); p.style.borderColor=''; p.style.color=''; p.style.background=''; });
+  el.classList.add('active');
+  el.style.borderColor = _themeMain;
+  el.style.color       = _themeMain;
+  el.style.background  = _themeBg;
+  _labelMsg  = el.dataset.msg;
+  _labelIcon = el.dataset.icon;
+  document.getElementById('timer-label-center').textContent = _labelIcon + ' ' + el.textContent.trim().replace(/^[^\s]+\s/,'');
+}
+
+/* ══════════════════════ DONE OVERLAY ══════════════════════ */
+function showDone() {
+  var messages = [
+    { icon:'🎉', title:'Time is up!',      sub:'Great work — well done for staying focused.' },
+    { icon:'⭐', title:'All done!',         sub:'You worked really hard. You should be proud!' },
+    { icon:'🌟', title:'Time\'s up!',      sub:_labelMsg + ' is finished. Give yourself a big clap!' },
+    { icon:'🏆', title:'You did it!',      sub:'That was brilliant focus. Time for a well-earned break.' }
+  ];
+  var m = messages[Math.floor(Math.random()*messages.length)];
+  document.getElementById('done-icon').textContent  = m.icon;
+  document.getElementById('done-title').textContent = m.title;
+  document.getElementById('done-sub').textContent   = m.sub;
+  document.getElementById('done-overlay').classList.add('show');
+}
+function hideDone() { document.getElementById('done-overlay').classList.remove('show'); }
+
+/* ══════════════════════ SOUND ══════════════════════ */
+function playDone() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[523,0],[659,.35],[784,.7],[1047,1.05]].forEach(function(pair) {
+      var osc  = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = pair[0];
+      gain.gain.setValueAtTime(0, ctx.currentTime + pair[1]);
+      gain.gain.linearRampToValueAtTime(.18, ctx.currentTime + pair[1] + .05);
+      gain.gain.linearRampToValueAtTime(0,   ctx.currentTime + pair[1] + .4);
+      osc.start(ctx.currentTime + pair[1]);
+      osc.stop(ctx.currentTime  + pair[1] + .45);
+    });
+  } catch(e) {}
+}
+
+/* ══════════════════════ SETTINGS ══════════════════════ */
+function toggleSettings() {
+  var p = document.getElementById('settings-panel');
+  p.classList.toggle('open');
+}
+
+function toggleOption(key) {
+  _opts[key] = !_opts[key];
+  document.getElementById('toggle-'+key).classList.toggle('on', _opts[key]);
+  if(key==='ticks') renderTicks();
+  if(key==='colour') updateUrgencyColour();
+}
+
+function setTheme(el, main, bg) {
+  document.querySelectorAll('.cs').forEach(function(s){ s.classList.remove('active'); });
+  el.classList.add('active');
+  applyTheme(main, bg);
+}
+
+/* ══════════════════════ INIT ══════════════════════ */
+drawRing();
+renderTicks();
+document.getElementById('ring-progress').style.strokeDasharray  = CIRCUMFERENCE;
+document.getElementById('ring-progress').style.strokeDashoffset = 0;
+applyTheme(_themeMain, _themeBg);
+</script>
+</body>
+</html>
